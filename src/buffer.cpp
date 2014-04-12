@@ -19,30 +19,49 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef rtgi_buffer_hpp
-#define rtgi_buffer_hpp
+#include <cassert>
+#include "buffer.hpp"
 
-#include "glwrap.hpp"
-
-class Buffer
+Buffer::Buffer(GLenum _type, GLenum _usage) : type(_type), usage(_usage)
 {
-	GLenum type;
-	GLenum usage;
-	GLuint handle;
-public:
-	Buffer(GLenum _type, GLenum _usage);
-	~Buffer();
+	glGenBuffers(1, &handle);
+}
+Buffer::~Buffer()
+{
+	glDeleteBuffers(1, &handle);
+}
 
-	Buffer(const Buffer&) = delete;
-	Buffer& operator=(const Buffer&) = delete;
+Buffer::Buffer(Buffer&& b) : type(b.type), usage(b.usage), handle(b.handle)
+{
+	b.handle = 0;
+}
+Buffer& Buffer::operator=(Buffer&& b)
+{
+	assert(this != &b);
+	glDeleteBuffers(1, &handle);
+	
+	type = b.type;
+	usage = b.usage;
+	handle = b.handle;
+	b.handle = 0;
+	return *this;
+}
 
-	Buffer(Buffer&& b);
-	Buffer& operator=(Buffer&& b);
-
-	void bind();
-	void unbind();
-	void data(void* _data, size_t _size);
-	GLuint getName();
-};
-
-#endif
+void Buffer::bind()
+{
+	glBindBuffer(type, handle);
+}
+void Buffer::unbind()
+{
+	glBindBuffer(type, 0);
+}
+void Buffer::data(void* _data, size_t _size)
+{
+	bind();
+	glBufferData(type, _size, _data, usage);
+	unbind();
+}
+GLuint Buffer::getName()
+{
+	return handle;
+}

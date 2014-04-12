@@ -22,9 +22,8 @@
 #ifndef rtgi_geometry_hpp
 #define rtgi_geometry_hpp
 
-#include <cassert>
-#include <iostream>
 #include <array>
+#include <cmath>
 
 #include "glwrap.hpp"
 #include "buffer.hpp"
@@ -50,79 +49,124 @@ class Geometry
 	size_t size;
 	bool vert_init = false, ind_init = false, vao_init = false;
 public:
-	Geometry() : vert(GL_ARRAY_BUFFER, GL_STATIC_DRAW), ind(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW), vao(0), size(0)
-	{
-		glGenVertexArrays(1, &vao);
-	}
-	~Geometry()
-	{
-		glDeleteVertexArrays(1, &vao);
-	}
+	Geometry();
+	~Geometry();
 
 	Geometry(const Geometry&) = delete;
 	Geometry& operator=(const Geometry&) = delete;
 
-	Geometry(Geometry&& g) : vert(std::move(g.vert)), ind(std::move(g.ind)),
-		vao(g.vao), size(g.size), vert_init(g.vert_init), ind_init(g.ind_init), vao_init(g.vao_init)
-	{
-		g.vao = 0;
-	}
-	Geometry& operator=(Geometry&& g)
-	{
-		assert(this != &g);
-		glDeleteVertexArrays(1, &vao);
-		
-		vert = std::move(g.vert);
-		ind = std::move(g.ind);
-		vao = g.vao;
-		size = g.size;
-		vert_init = g.vert_init;
-		ind_init = g.ind_init;
-		vao_init = g.vao_init;
-		g.vao = 0;
-		return *this;
-	}
+	Geometry(Geometry&& g);
+	Geometry& operator=(Geometry&& g);
 	
-	void draw()
-	{
-		if(!vert_init || !ind_init || !vao_init || !size)
-		{
-			std::cout << "incomplete geometry status" << std::endl;
-			return;
-		}
-		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, GLsizei(size), GL_UNSIGNED_INT, 0);
-	}
+	void draw();
 
-	void vertices(void* _data, size_t _byte_size)
-	{
-		vert.data(_data, _byte_size);
-		vert_init = true;
-	}
-	void indices(void* _data, size_t _byte_size)
-	{
-		size = _byte_size/sizeof(GLuint); // expect gluint array
-		ind.data(_data, _byte_size);
-
-		glBindVertexArray(vao);
-		ind.bind(); // element array is part of vao state
-		glBindVertexArray(0);
-		ind.unbind();
-
-		ind_init = true;
-	}
+	void vertices(void* _data, size_t _byte_size);
+	void indices(void* _data, size_t _byte_size);
 	// _index index of vertex attribute, _size number of components(1..4), _stride total vertex size, _offset byte offset into buffer
-	void addVertexAttrib(GLuint _index, GLint _size, GLuint _stride, const GLvoid* _offset)
-	{
-		vert.bind();
-		glBindVertexArray(vao);
-		glEnableVertexAttribArray(_index);
-		glVertexAttribPointer(_index, _size, GL_FLOAT, GL_FALSE, _stride, _offset); // array buffer isn't part of vao state
-		glBindVertexArray(0);
-		vert.unbind();
-
-		vao_init = true;
-	}
+	void addVertexAttrib(GLuint _index, GLint _size, GLuint _stride, const GLvoid* _offset);
 };
 
+
+template<GLuint rings, GLuint sectors>
+struct Sphere
+{
+	std::array<vertex, rings * sectors> vertices;
+	std::array<face, (rings-1) * sectors * 2> indices;
+	
+	Sphere(GLfloat radius)
+	{
+		GLfloat const R = 1.f/float(rings-1);
+		GLfloat const S = 1.f/float(sectors-1);
+		
+		auto v = vertices.begin();
+		auto i = indices.begin();
+		for(GLuint r = 0; r < rings; ++r)
+		{
+			for(GLuint s = 0; s < sectors; ++s)
+			{
+				float const x = cos(tau * s * S) * sin((tau/2.f) * r * R);
+				float const y = cos((tau/2.f) * r * R);
+				float const z = sin(tau * s * S) * sin((tau/2.f) * r * R);
+				v->pos = {{ x * radius, y * radius, z * radius }};
+				v->norm = {{ x, y, z }};
+				v->text = {{ s * S, r * R }};
+				++v;
+			}
+		}
+		for(GLuint r = 0; r < rings-1; ++r)
+		{
+			for(GLuint s = 0; s < sectors; ++s)
+			{
+				GLuint iBase = r*rings;
+				GLuint i00 = iBase + s;
+				GLuint i01 = iBase + (s == sectors-1 ? 0 : s+1);
+				
+				i->triang = {{ i00, i01 + sectors, i00 + sectors }};
+				i++;
+				
+				i->triang = {{ i00, i01, i01 + sectors }};
+				i++;
+			}
+		}
+	}
+};
+template<GLuint div>
+struct Plane
+{
+	std::array<vertex, div*div> vertices;
+	std::array<face, (div-1)*(div-1)*2> indices;
+	Plane(GLfloat size)
+	{
+		auto v = vertices.begin();
+		auto in = indices.begin();
+		for(size_t i = 0; i < div; ++i)
+		{
+			for(size_t j = 0; j < div; ++j)
+			{
+				v->pos = {{ (float(i)-(float(div)/2.f))/2.f, 0.f, (float(j)-(float(div)/2.f))/2.f }};
+				v->norm = {{ 0.f, 1.f, 0.f }};
+				v->text = {{ float(i)/float(div), float(j)/float(div) }};
+				++v;
+			}
+		}
+		for(GLuint i = 0; i < div-1; ++i)
+		{
+			for(GLuint j = 0; j < div-1; ++j)
+			{
+				in->triang = {{ i+(div*j), i+(div*j)+1, i+(div*j)+div }};
+				++in;
+				in->triang = {{ i+(div*j)+1, i+(div*j)+1+div, i+(div*j)+div }};
+				++in;
+			}
+		}
+	}
+};
+// struct Cube
+// {
+// 	std::array<vertex,8> vertices;
+// 	std::array<face,12> indices;
+// 	Cube(GLfloat size)
+// 	{
+// 		vertices = std::array<vertex, 8>
+// 		{
+// 			{{-size, -size, size}, {.0f, .0f, 1.f},{.0f, .0f}},
+// 			{{size, -size, size}, {1.f, .0f, 1.f},{.0f, .0f}},
+// 			{{size, size, size}, {1.f, 1.f, 1.f},{.0f, .0f}},
+// 			{{-size, size, size}, {.0f, 1.f, 1.f},{.0f, .0f}},
+// 			{{-size, -size, -size}, {.0f, .0f, .0f},{.0f, .0f}},
+// 			{{size, -size, -size}, {1.f, .0f, .0f},{.0f, .0f}},
+// 			{{size, size, -size}, {1.f, 1.f, .0f},{.0f, .0f}},
+// 			{{-size, size, -size}, {.0f, 1.f, .0f},{.0f, .0f}}
+// 		};
+// 	 	indices = std::array<face, 12>
+// 	 	{
+// 			{{0, 1, 2}}, {{0, 2, 3}},
+// 			{{1, 5, 6}}, {{1, 6, 2}},
+// 			{{5, 4, 7}}, {{5, 7, 6}},
+// 			{{4, 0, 3}}, {{4, 3, 7}},
+// 			{{2, 6, 7}}, {{2, 7, 3}},
+// 			{{0, 4, 5}}, {{0, 5, 1}}
+// 		};
+// 	}
+// };
 #endif

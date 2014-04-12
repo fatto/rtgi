@@ -19,8 +19,8 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef cglab_pipelineGL_hpp
-#define cglab_pipelineGL_hpp
+#ifndef rtgi_application_hpp
+#define rtgi_application_hpp
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -33,17 +33,16 @@
 #include <array>
 #include <cassert>
 
-class pipelineGL
+class application
 {
 	GLFWwindow* win;
 	int w_width, w_height;
 	int f_width, f_height;
-	Geometry cube, terrain, sphere;
-	Shader shader_color, shader_uv;
-	Texture background;
+	Geometry sphere;
+	Shader shader;
 	glm::mat4 model, view, projection;
 public:
-	pipelineGL(GLFWwindow* _win);
+	application(GLFWwindow* _win);
 	void update(float dt);
 	void draw();
 };

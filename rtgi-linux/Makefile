@@ -1,6 +1,6 @@
 TARGET = rtgi
 
-CXXFLAGS = -g -std=c++11 -I. -I../header -DGLCOREARB_PROTOTYPES -DGLM_FORCE_RADIANS
+CXXFLAGS = -Wall -g -std=c++11 -MMD -I. -I../header -DGLM_FORCE_RADIANS
 LFLAGS = -L./lib -Wl,-rpath,./rtgi-linux/lib/
 LIBRARY = -lglfw -lGL
 # -lm -lGL

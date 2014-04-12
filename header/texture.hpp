@@ -23,73 +23,68 @@
 #define rtgi_texture_hpp
 
 #include <string>
-#include <vector>
-#include <iostream>
 
 #include "glwrap.hpp"
-#include "lodepng.h"
 
-
-class Texture
+class Texture2
 {
 	GLuint handle;
 	GLuint unit;
 public:
-	Texture(const std::string& _filename, GLuint _unit = 0)
-	{
-		std::vector<GLubyte> image;
-		GLuint width, height;
-		unsigned error = lodepng::decode(image, width, height, _filename.c_str());
-		if(error)
-			std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
+	Texture2(GLuint _unit = 0);
+	~Texture2();
 
-		glGenTextures(1, &handle);
-		glActiveTexture(GL_TEXTURE0 + unit);
-		glBindTexture(GL_TEXTURE_2D, handle);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-	~Texture()
-	{
-		glDeleteTextures(1, &handle);
-	}
+	Texture2(const Texture2&) = delete;
+	Texture2& operator=(const Texture2&) = delete;
 
-	Texture(const Texture&) = delete;
-	Texture& operator=(const Texture&) = delete;
+	Texture2(Texture2&& t);
+	Texture2& operator=(Texture2&& t);
 
-	Texture(Texture&& t) : handle(t.handle), unit(t.unit)
-	{
-		t.handle = 0;
-	}
-	Texture& operator=(Texture&& t)
-	{
-		assert(this != &t);
-		glDeleteTextures(1, &handle);
+	void file(const std::string& _filename);
+	void bind();
+	GLuint getUnit();
+};
 
-		handle = t.handle;
-		unit = t.unit;
-		t.handle = 0;
-		return *this;
-	}
-	void bind()
-	{
-		glActiveTexture(GL_TEXTURE0 + unit);
-		glBindTexture(GL_TEXTURE_2D, handle);
-	}
-	void unbind()
-	{
-		glActiveTexture(GL_TEXTURE0 + unit);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-	GLuint getUnit()
-	{
-		return unit;
-	}
+class Texture3
+{
+	GLuint handle;
+	GLuint unit;
+public:
+	Texture3(GLuint _unit = 0);
+	~Texture3();
+
+	Texture3(const Texture3&) = delete;
+	Texture3& operator=(const Texture3&) = delete;
+
+	Texture3(Texture3&& t);
+	Texture3& operator=(Texture3&& t);
+
+	void alloc(GLsizei _size_x, GLsizei _size_y, GLsizei _size_z);
+	void clear();
+	void bind();
+	void bindImage(GLenum _format, GLenum _access = GL_READ_WRITE, GLint _level = 0);
+	void unbind();
+	GLuint getUnit();
+};
+
+class TextureBuffer
+{
+	GLuint handle;
+	GLuint unit;
+public:
+	TextureBuffer(GLuint _unit = 0);
+	~TextureBuffer();
+
+	TextureBuffer(const TextureBuffer&) = delete;
+	TextureBuffer& operator=(const TextureBuffer&) = delete;
+
+	TextureBuffer(TextureBuffer&& t);
+	TextureBuffer& operator=(TextureBuffer&& t);
+
+	void buffer(GLuint _buffer, GLenum _format);
+	void bind();
+	void bindImage(GLenum _format, GLenum _access = GL_READ_WRITE, GLint _level = 0);
+	GLuint getUnit();
 };
 
 #endif

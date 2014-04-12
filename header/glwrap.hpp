@@ -22,11 +22,11 @@
 #ifndef rtgi_glwrap_hpp
 #define rtgi_glwrap_hpp
 
-#ifdef _WIN32
-#include <GL/glew.h>
-#else
-#define GLFW_INCLUDE_GLCOREARB
-#endif
+// #ifdef _WIN32
+// #include <GL/glew.h>
+// #else
+#include "gl_core_4_4.h"
+// #endif
 
 #include <GLFW/glfw3.h>
 

@@ -13,7 +13,12 @@
   <ItemGroup>
     <ClCompile Include="..\src\lodepng.cpp" />
     <ClCompile Include="..\src\main.cpp" />
-    <ClCompile Include="..\src\pipelineGL.cpp" />
+    <ClCompile Include="..\src\shader.cpp" />
+    <ClCompile Include="..\src\texture.cpp" />
+    <ClCompile Include="..\src\application.cpp" />
+    <ClCompile Include="..\src\buffer.cpp" />
+    <ClCompile Include="..\src\geometry.cpp" />
+    <ClCompile Include="..\src\gl_core_4_4.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\header\buffer.hpp" />
@@ -22,7 +27,8 @@
     <ClInclude Include="..\header\lodepng.h" />
     <ClInclude Include="..\header\shader.hpp" />
     <ClInclude Include="..\header\texture.hpp" />
-    <ClInclude Include="..\src\pipelineGL.hpp" />
+    <ClInclude Include="..\header\application.hpp" />
+    <ClInclude Include="..\header\gl_core_4_4.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4C865A99-C61C-4524-B0B7-F7AA6ADA86E7}</ProjectGuid>
