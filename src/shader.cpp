@@ -31,9 +31,9 @@ Shader::Shader()
 	// stage[GL_GEOMETRY_SHADER] = 0;
 	// stage[GL_FRAGMENT_SHADER] = 0;
 	ext_enum = std::unordered_map<std::string, GLenum>{
-		{ { "vert", GL_VERTEX_SHADER } },
-		{ { "geom", GL_GEOMETRY_SHADER } },
-		{ { "frag", GL_FRAGMENT_SHADER } }
+		{ "vert", GL_VERTEX_SHADER },
+		{ "geom", GL_GEOMETRY_SHADER },
+		{ "frag", GL_FRAGMENT_SHADER }
 	};
 	program = glCreateProgram();
 }
