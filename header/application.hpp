@@ -39,7 +39,10 @@ class application
 	int w_width, w_height;
 	int f_width, f_height;
 	Geometry sphere;
-	Shader shader;
+	Geometry quad;
+	Shader shader_voxelize;
+	Shader shader_ray;
+	Texture3 tex3;
 	glm::mat4 model, view, projection;
 public:
 	application(GLFWwindow* _win);

@@ -33,7 +33,7 @@
 // #pragma comment(lib,"glew32.lib")
 
 #if defined(_DEBUG)
-// #pragma comment(lib,"glfw3d.lib")
+#pragma comment(lib,"glfw3d.lib")
 #else
 #pragma comment(lib,"glfw3.lib")
 #endif
@@ -147,7 +147,7 @@ static void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum
 {
 	std::string error = FormatDebugOutput(source, type, id, severity, message);
 	std::cout << error << std::endl;
-	raise(SIGABRT);
+	//raise(SIGABRT);
 }
 
 int main(int argc, char*argv[])

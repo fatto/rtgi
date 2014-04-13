@@ -113,29 +113,31 @@ struct Sphere
 template<GLuint div>
 struct Plane
 {
-	std::array<vertex, div*div> vertices;
-	std::array<face, (div-1)*(div-1)*2> indices;
+	std::array<vertex, (div+1)*(div+1)> vertices;
+	std::array<face, div*div*2> indices;
 	Plane(GLfloat size)
 	{
 		auto v = vertices.begin();
 		auto in = indices.begin();
-		for(size_t i = 0; i < div; ++i)
+		for(size_t i = 0; i <= div; ++i)
 		{
-			for(size_t j = 0; j < div; ++j)
+			for(size_t j = 0; j <= div; ++j)
 			{
-				v->pos = {{ (float(i)-(float(div)/2.f))/2.f, 0.f, (float(j)-(float(div)/2.f))/2.f }};
+				auto x = (float(i)/(float(div)))-0.5f;
+				auto z = (float(j)/(float(div)))-0.5f;
+				v->pos = {{ x*size, 0.f,  z*size }};
 				v->norm = {{ 0.f, 1.f, 0.f }};
 				v->text = {{ float(i)/float(div), float(j)/float(div) }};
 				++v;
 			}
 		}
-		for(GLuint i = 0; i < div-1; ++i)
+		for(GLuint i = 0; i < div; ++i)
 		{
-			for(GLuint j = 0; j < div-1; ++j)
+			for(GLuint j = 0; j < div; ++j)
 			{
-				in->triang = {{ i+(div*j), i+(div*j)+1, i+(div*j)+div }};
+				in->triang = { { i + ((div + 1)*j), i + ((div + 1)*j) + 1, i + ((div + 1)*j) + (div + 1) } };
 				++in;
-				in->triang = {{ i+(div*j)+1, i+(div*j)+1+div, i+(div*j)+div }};
+				in->triang = { { i + ((div + 1)*j) + 1, i + ((div + 1)*j) + 1 + (div + 1), i + ((div + 1)*j) + (div + 1) } };
 				++in;
 			}
 		}

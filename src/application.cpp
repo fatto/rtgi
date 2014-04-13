@@ -32,22 +32,30 @@ application::application(GLFWwindow* _win) : win(_win)
 	glfwGetWindowSize(win, &w_width, &w_height);
 	glfwGetFramebufferSize(win, &f_width, &f_height);
 
-	shader.setStage("shader/voxel.vert");
-	shader.setStage("shader/voxel.geom");
-	shader.setStage("shader/voxel.frag");
-	shader.link();
+	shader_voxelize.setStage("shader/voxel.vert");
+	shader_voxelize.setStage("shader/voxel.geom");
+	shader_voxelize.setStage("shader/voxel.frag");
+	shader_voxelize.link();
+
+	shader_ray.setStage("shader/ray.vert");
+	shader_ray.setStage("shader/ray.frag");
+	shader_ray.link();
 
 
-	Sphere<30, 30> sph(1.5f);
+	Sphere<10, 10> sph(32.f);
 	sphere.vertices(sph.vertices.data(), sph.vertices.size()*sizeof(vertex));
 	sphere.indices(sph.indices.data(), sph.indices.size()*sizeof(face));
-	sphere.addVertexAttrib(shader.attrib("position"), 3, sizeof(vertex), offsetof_ptr(vertex, pos));
-	std::cout << shader.attrib("position") << std::endl;
-	std::cout << shader.attrib("normal") << std::endl;
-	sphere.addVertexAttrib(shader.attrib("normal"), 3, sizeof(vertex), offsetof_ptr(vertex, norm));
+	sphere.addVertexAttrib(0, 3, sizeof(vertex), offsetof_ptr(vertex, pos));
+	sphere.addVertexAttrib(1, 3, sizeof(vertex), offsetof_ptr(vertex, norm));
 	// sphere.addVertexAttrib(shader.attrib("uv"), 2, sizeof(vertex), offsetof_ptr(vertex, text));
 
-	
+
+	Plane<1> fullscreen_quad(2.f);
+	quad.vertices(fullscreen_quad.vertices.data(), fullscreen_quad.vertices.size()*sizeof(vertex));
+	quad.indices(fullscreen_quad.indices.data(), fullscreen_quad.indices.size()*sizeof(face));
+	quad.addVertexAttrib(0, 3, sizeof(vertex), offsetof_ptr(vertex, pos));
+
+
 	model = glm::mat4(1.f);
 	view = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.0f, -4.f));
 	projection = glm::perspective(tau/6.f, float(w_width)/float(w_height), .1f, 150.f);
@@ -55,14 +63,13 @@ application::application(GLFWwindow* _win) : win(_win)
 
 	float gray = 45.f / 255.f;
 	glClearColor(gray, gray, gray, 1.f);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE);
 
 
-	Texture3 test_tex;
-	test_tex.alloc(256,256,256);
-	test_tex.clear();
-	std::cout << test_tex.getUnit() << std::endl;
+	tex3.alloc(256,256,256);
+	tex3.clear();
+	std::cout <<"texture 3d " << tex3.getUnit() << std::endl;
 }
 
 void application::update(float dt)
@@ -84,10 +91,28 @@ void application::draw()
 //	cube.draw();
 	
 	// background.bind();
-	shader.bind();
-	shader.load("model", model);
-	shader.load("view", view);
-	shader.load("projection", projection);
-//	terrain.draw();
-	sphere.draw();
+	{
+		glViewport(0,0,256,256);
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		tex3.clear();
+		shader_voxelize.bind();
+		shader_voxelize.load("model", model);
+		shader_voxelize.load("view", view);
+		shader_voxelize.load("projection", glm::ortho(-32.f, 32.f, -32.f, 32.f, -32.f, 32.f));
+		tex3.bindImage(GL_R32UI, GL_WRITE_ONLY);
+		sphere.draw();
+	}
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	{
+		glViewport(0,0, f_width, f_height);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		shader_ray.bind();
+		//shader_ray.load("MVP", glm::rotate(glm::mat4(1.f), tau/4.f, glm::vec3(1.f,0.f,0.f)));
+		tex3.bindImage(GL_R32UI, GL_READ_ONLY);
+		quad.draw();
+	}
 }

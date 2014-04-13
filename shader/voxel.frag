@@ -10,7 +10,7 @@ in VoxelData
 
 //vec3 light_dir = normalize(vec3(-1,-1,-1)); // hardcoding for the win
 
-layout (r32ui, location=0) coherent uniform uimage3D volume_texture;
+layout (r32ui, location=0) /*coherent*/ restrict uniform uimage3D volume_texture;
 layout (location = 0) out vec4 frag_colour;
 
 uint convVec4ToRGBA8(vec4 val) {
@@ -31,12 +31,12 @@ void main()
 		//vec3 colour = In.colour*vec3(0.7) + (coords/vec3(imageSize(volume_texture))) * vec3(0.3);
 		vec3 colour = In.colour;
 		//vec3 coords = vec3(gl_FragCoord.xy, gl_FragCoord.z * viewport_size.x);
-		//mageStore(volume_texture, ivec3(coords), vec4(In.color, 1.0));
-		//imageStore(volume_texture, ivec3(coords), uvec4(convVec4ToRGBA8(vec4(In.colour, 1.0))));
 		imageStore(volume_texture, ivec3(coords), uvec4(convVec4ToRGBA8(vec4(colour, 1.0))));
+		//imageStore(volume_texture, ivec3(coords), uvec4(convVec4ToRGBA8(vec4(In.normal, 1.0))));
+
 	}
-	else
-	{
-		discard;
-	}
+	//else
+	//{
+	//	discard;
+	//}
 }

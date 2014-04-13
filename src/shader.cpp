@@ -25,11 +25,16 @@
 
 #include "shader.hpp"
 
-Shader::Shader()// : vertex(0), fragment(0)
+Shader::Shader()
 {
 	// stage[GL_VERTEX_SHADER] = 0;
 	// stage[GL_GEOMETRY_SHADER] = 0;
 	// stage[GL_FRAGMENT_SHADER] = 0;
+	ext_enum = std::unordered_map<std::string, GLenum>{
+		{ { "vert", GL_VERTEX_SHADER } },
+		{ { "geom", GL_GEOMETRY_SHADER } },
+		{ { "frag", GL_FRAGMENT_SHADER } }
+	};
 	program = glCreateProgram();
 }
 Shader::~Shader()
@@ -151,6 +156,7 @@ void Shader::link()
 	else
 	{
 		load_uniform();
+		load_attrib();
 		// prog_init = true;
 	}
 }
@@ -182,8 +188,6 @@ GLuint Shader::compile_shader(const std::string& source, GLenum type) const
 #else
 	std::string _source("#version 440\n" + source);
 #endif
-	std::cout << _source << std::endl;
-	std::cout << "type " << type << std::endl;
 	GLuint handle = glCreateShader(type);
 	const GLchar* c_str = _source.c_str();
 	glShaderSource(handle, 1, &c_str, NULL);
@@ -218,5 +222,25 @@ void Shader::load_uniform()
 		GLuint location = glGetUniformLocation(program, name_uniform.c_str());
 		if(location != GLuint(-1))
 			uniforms[name_uniform] = location;
+	}
+}
+
+void Shader::load_attrib()
+{
+	GLint attrubutes_size = 0;
+	glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &attrubutes_size);
+	for (GLint i = 0; i < attrubutes_size; ++i)
+	{
+		std::string name_attrib;
+		{
+			GLchar name[256];
+			GLint array_size = 0, actual_length = 0;
+			GLenum type = 0;
+			glGetActiveAttrib(program, i, 256, &actual_length, &array_size, &type, name);
+			name_attrib = std::string{ name, size_t(actual_length) };
+		}
+		GLuint location = glGetAttribLocation(program, name_attrib.c_str());
+		if (location != GLuint(-1))
+			attribs[name_attrib] = location;
 	}
 }

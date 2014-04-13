@@ -18,6 +18,7 @@ out VoxelData
 
 uniform mat4 projection;
 const float pixel_diagonal = 0.0055242716;
+//const float pixel_diagonal = 0.0;
 
 void main()
 {

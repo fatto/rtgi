@@ -35,13 +35,10 @@ private:
 	GLuint program;
 	//GLuint vertex, fragment;
 	std::unordered_map<std::string, GLuint> uniforms;
+	std::unordered_map<std::string, GLuint> attribs;
 	std::unordered_map<GLenum, GLuint> stage;
 	// bool vert_init = false, frag_init = false, pro_init = false;
-	const std::unordered_map<std::string, GLenum> ext_enum{
-		{"vert", GL_VERTEX_SHADER},
-		{"geom", GL_GEOMETRY_SHADER},
-		{"frag", GL_FRAGMENT_SHADER}
-	};
+	std::unordered_map<std::string, GLenum> ext_enum;
 	// const std::regex file_extension("\.([A-Za-z0-9]+)");
 public:
 	Shader();
@@ -65,6 +62,7 @@ public:
 private:
 	GLuint compile_shader(const std::string& source, GLenum type) const;
 	void load_uniform();
+	void load_attrib();
 };
 
 #endif
