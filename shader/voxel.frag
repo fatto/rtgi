@@ -1,3 +1,5 @@
+#extension GL_NV_shader_atomic_float : require
+
 in VoxelData
 {
 	vec3 position;

@@ -55,10 +55,12 @@ public:
 	void link();
 
 	void bind();
+	void load(const std::string& _name, const GLfloat _data);
 	void load(const std::string& _name, const GLint _data);
+	void load(const std::string& _name, const glm::vec2& _data);
 	void load(const std::string& _name, const glm::vec3& _data);
 	void load(const std::string& _name, const glm::mat4& _data);
-	GLint attrib(const std::string& _name);
+	GLuint attrib(const std::string& _name);
 private:
 	GLuint compile_shader(const std::string& source, GLenum type) const;
 	void load_uniform();

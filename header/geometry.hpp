@@ -59,11 +59,13 @@ public:
 	Geometry& operator=(Geometry&& g);
 	
 	void draw();
+	void drawArray(GLsizei _count);
 
-	void vertices(void* _data, size_t _byte_size);
-	void indices(void* _data, size_t _byte_size);
+	void vertices(const void* _data, size_t _byte_size);
+	void indices(const void* _data, size_t _byte_size);
 	// _index index of vertex attribute, _size number of components(1..4), _stride total vertex size, _offset byte offset into buffer
 	void addVertexAttrib(GLuint _index, GLint _size, GLuint _stride, const GLvoid* _offset);
+	void addVertexAttribI(GLuint _index, GLint _size, GLuint _stride, const GLvoid* _offset);
 };
 
 

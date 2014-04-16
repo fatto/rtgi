@@ -147,7 +147,8 @@ static void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum
 {
 	std::string error = FormatDebugOutput(source, type, id, severity, message);
 	std::cout << error << std::endl;
-	//raise(SIGABRT);
+	if(severity == GL_DEBUG_SEVERITY_HIGH)
+		raise(SIGABRT);
 }
 
 int main(int argc, char*argv[])
@@ -176,6 +177,7 @@ int main(int argc, char*argv[])
 		return EXIT_FAILURE;
 	}
 	glfwMakeContextCurrent(window);
+	glfwSwapInterval(0);
 
 // #if defined(_MSC_VER)
 // 	glewExperimental = true;

@@ -40,10 +40,14 @@ class application
 	int f_width, f_height;
 	Geometry sphere;
 	Geometry quad;
+	Geometry text;
 	Shader shader_voxelize;
 	Shader shader_ray;
+	Shader shader_text;
+	Texture2 fontmap;
 	Texture3 tex3;
 	glm::mat4 model, view, projection;
+	float delta = 0.f;
 public:
 	application(GLFWwindow* _win);
 	void update(float dt);

@@ -41,7 +41,8 @@ public:
 
 	void bind();
 	void unbind();
-	void data(void* _data, size_t _size);
+	void data(const void* _data, size_t _size);
+	void dataUpdate(const void* _data, size_t _size);
 	GLuint getName();
 };
 

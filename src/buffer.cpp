@@ -55,10 +55,16 @@ void Buffer::unbind()
 {
 	glBindBuffer(type, 0);
 }
-void Buffer::data(void* _data, size_t _size)
+void Buffer::data(const void* _data, size_t _size)
 {
 	bind();
 	glBufferData(type, _size, _data, usage);
+	unbind();
+}
+void Buffer::dataUpdate(const void* _data, size_t _size)
+{
+	bind();
+	glBufferSubData(type, 0, _size, _data);
 	unbind();
 }
 GLuint Buffer::getName()

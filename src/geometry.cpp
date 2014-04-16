@@ -65,12 +65,30 @@ void Geometry::draw()
 	glDrawElements(GL_TRIANGLES, GLsizei(size), GL_UNSIGNED_INT, 0);
 }
 
-void Geometry::vertices(void* _data, size_t _byte_size)
+void Geometry::drawArray(GLsizei _count)
 {
-	vert.data(_data, _byte_size);
-	vert_init = true;
+	if(!vert_init || !vao_init)
+	{
+		std::cout << "incomplete geometry status" << std::endl;
+		return;
+	}
+	glBindVertexArray(vao);
+	glDrawArrays(GL_POINTS, 0, _count);
 }
-void Geometry::indices(void* _data, size_t _byte_size)
+
+void Geometry::vertices(const void* _data, size_t _byte_size)
+{
+	if(vert_init)
+	{
+		vert.dataUpdate(_data, _byte_size);
+	}
+	else
+	{
+		vert.data(_data, _byte_size);
+		vert_init = true;
+	}
+}
+void Geometry::indices(const void* _data, size_t _byte_size)
 {
 	size = _byte_size/sizeof(GLuint); // expect gluint array
 	ind.data(_data, _byte_size);
@@ -89,6 +107,18 @@ void Geometry::addVertexAttrib(GLuint _index, GLint _size, GLuint _stride, const
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(_index);
 	glVertexAttribPointer(_index, _size, GL_FLOAT, GL_FALSE, _stride, _offset); // array buffer isn't part of vao state
+	glBindVertexArray(0);
+	vert.unbind();
+
+	vao_init = true;
+}
+
+void Geometry::addVertexAttribI(GLuint _index, GLint _size, GLuint _stride, const GLvoid* _offset)
+{
+	vert.bind();
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(_index);
+	glVertexAttribIPointer(_index, _size, GL_UNSIGNED_BYTE, _stride, _offset); // array buffer isn't part of vao state
 	glBindVertexArray(0);
 	vert.unbind();
 

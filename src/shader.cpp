@@ -165,9 +165,17 @@ void Shader::bind()
 {
 	glUseProgram(program);
 }
+void Shader::load(const std::string& _name, const GLfloat _data)
+{
+	glUniform1f(uniforms.at(_name), _data);
+}
 void Shader::load(const std::string& _name, const GLint _data)
 {
 	glUniform1i(uniforms.at(_name), _data);
+}
+void Shader::load(const std::string& _name, const glm::vec2& _data)
+{
+	glUniform2fv(uniforms.at(_name), 1, &_data[0]);
 }
 void Shader::load(const std::string& _name, const glm::vec3& _data)
 {
@@ -177,9 +185,9 @@ void Shader::load(const std::string& _name, const glm::mat4& _data)
 {
 	glUniformMatrix4fv(uniforms.at(_name), 1, GL_FALSE, &_data[0][0]);
 }
-GLint Shader::attrib(const std::string& _name)
+GLuint Shader::attrib(const std::string& _name)
 {
-	return glGetAttribLocation(program, _name.c_str());
+	return attribs.at(_name);
 }
 GLuint Shader::compile_shader(const std::string& source, GLenum type) const
 {

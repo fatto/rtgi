@@ -39,14 +39,13 @@ vec3 rayAABB_test(vec3 ray_origin, vec3 ray_dir, vec3 aabb_min, vec3 aabb_max)
 void main()
 {
 	const ivec3 tex_size = imageSize(volume_texture);
-	vec2 coord = coordinates*vec2(0.5) + vec2(0.5);
+	// vec2 coord = coordinates*vec2(0.5) + vec2(0.5);
 	vec2 ray_coords = coordinates;
 
 	vec4 ndc0 = vec4(ray_coords, -1.0, 1.0);
 	vec4 ndc1 = vec4(ray_coords, -0.5, 1.0);
-	mat4 mat_inv = inverse(mvp_inverse); // TODO inverse on c++ side :(
-	vec4 world0 = mat_inv * ndc0;
-	vec4 world1 = mat_inv * ndc1;
+	vec4 world0 = mvp_inverse * ndc0;
+	vec4 world1 = mvp_inverse * ndc1;
 	world0 /= world0.w;
 	world1 /= world1.w;
 
@@ -61,15 +60,15 @@ void main()
 
 	vec3 inv_ray = 1.0 / ray_dir;
 
-	vec4 final_colour = vec4(0.1f);
-	vec3 result = rayAABB_test(ray_origin, ray_dir, vec3(0.0), imageSize(volume_texture));
+	colour = vec4(0.0);
+	vec3 result = rayAABB_test(ray_origin, ray_dir, vec3(0.0), tex_size);
 	if(result.x != 0.0)
 	{
 		float t_min = result.y;
 		float t_max = result.z;
 
 		vec3 start_pos = ray_origin + ray_dir * t_min;
-		vec3 voxel_pos = max(vec3(0.0), min(imageSize(volume_texture) - vec3(1.0), floor(start_pos)));
+		vec3 voxel_pos = max(vec3(0.0), min(tex_size - vec3(1.0), floor(start_pos)));
 
 		while(all(greaterThanEqual(voxel_pos, vec3(0.0))) && all(lessThan(voxel_pos, imageSize(volume_texture))))
 		{
@@ -77,7 +76,7 @@ void main()
 
 			if(partial_colour.a > 0.0)
 			{
-				colour += partial_colour;
+				colour = partial_colour;
 				break;
 			}
 
@@ -88,18 +87,16 @@ void main()
 			if(tmax.x == t) voxel_pos.x += sign(ray_dir.x);
 			else if(tmax.y == t) voxel_pos.y += sign(ray_dir.y);
 			else voxel_pos.z += sign(ray_dir.z);
+			// colour = vec4(partial_colour.xyz, 1.0);
 		}
 	}
 
-	ivec2 denorm_coord = ivec2(floor(tex_size.xy*coord));
+// 	ivec2 denorm_coord = ivec2(floor(tex_size.xy*coord));
 
-	colour = vec4(0.0,0.0,0.0,1.0);
-	//colour = vec4(x_coord, y_coord, tex_size.z,1.0)/ vec4(255);
+// 	colour = vec4(0.0,0.0,0.0,1.0);
 
-	for(int pos = 0; pos < tex_size.z; ++pos)
-	{
-		colour += convRGBA8ToVec4(imageLoad(volume_texture, ivec3(denorm_coord, pos)).r);
-		//colour += ivec4(x_coord, y_coord, pos, 0.0)/vec4(255);
-	}
-	//colour = vec4(vec2(denorm_coord)/vec2(128), 0.0, 1.0);
+// 	for(int pos = 0; pos < tex_size.z; ++pos)
+// 	{
+// 		colour += convRGBA8ToVec4(imageLoad(volume_texture, ivec3(denorm_coord, pos)).r);
+// 	}
 }
