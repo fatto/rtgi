@@ -40,6 +40,7 @@ public:
 	Texture2(Texture2&& t);
 	Texture2& operator=(Texture2&& t);
 
+	void alloc(GLsizei _size_x, GLsizei _size_y);
 	void file(const std::string& _filename);
 	void bind();
 	GLuint getUnit();

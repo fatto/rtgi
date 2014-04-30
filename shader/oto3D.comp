@@ -1,0 +1,47 @@
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 8 ) in;
+
+uniform layout(binding=0, r8 ) image3D voxel_dimimage;
+uniform layout(binding=1, r32ui ) uimageBuffer octree_buf;
+uniform layout(binding=2, rgb10_a2ui) uimageBuffer voxel_pos;
+uniform int octree_level;
+uniform int voxel_dim;
+uniform int num_voxel_frag;
+
+void main()
+{
+	vec4 data = vec4(1.0, 0.0, 0.0, 0.0);
+	uvec3 umin, umax;
+	uvec3 loc = gl_GlobalInvocationID;
+	uint idx = 0;
+	int depth;
+	int voxelDim = voxel_dim;
+	bool occupied = true;
+
+	if(loc.x >= voxel_dim || loc.y >= voxel_dim || loc.z >= voxel_dim)
+		return;
+
+	umin = uvec3(0, 0, 0);
+	umax = uvec3(voxelDim, voxelDim, voxelDim);
+
+	for(depth = 0; depth <= octree_level; ++depth)
+	{
+		idx = imageLoad(octree_buf, int(idx)).r;
+		if((idx & 0x80000000) == 0)
+		{
+			occupied = false;
+			break;
+		}
+		else if(depth == octree_level)
+			break;
+
+		idx &= 0x7FFFFFFF;
+		if(idx == 0)
+		{
+			occupied = false;
+			break;
+		}
+		voxelDim /= 2;
+
+		
+	}
+}

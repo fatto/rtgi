@@ -41,11 +41,42 @@ class application
 	Geometry sphere;
 	Geometry quad;
 	Geometry text;
-	Shader shader_voxelize;
-	Shader shader_ray;
-	Shader shader_text;
+
+	//// Shader
+	Shader text_shader;
+	// rendering
+	Shader render_shader;
+	// svo construction
+	Shader voxelize_shader;
+	Shader node_flag_shader;
+	Shader node_alloc_shader;
+	Shader node_init_shader;
+	Shader leaf_store_shader;
+	Shader mipmap_node_shader;
+	// deferred
+	Shader pass_shader;
+	Shader deferred_shader;
+	// debug
+	Shader octree_to_3D_shader;
+	// Shader shader_ray;
+
+	// voxel dimension
+	int voxel_dim = 128;
+	int octree_level = 7;
+	unsigned int num_voxel_frag = 0;
+	// voxel creation buffers
+	// GLuint voxelTex = 0;   //3D texture
+	// GLuint voxelPosTex = 0;  //texture for voxel fragment list (position)
+	// GLuint voxelPosTbo = 0;  //texture buffer object for voxel fragment list (position)
+	// GLuint voxelKdTex = 0;  //texture for voxel fragment list (diffuse)
+	// GLuint voxelKdTbo = 0;  //texture buffer object for voxel fragment list (diffuse)
+	// GLuint voxelNrmlTex = 0;  //texture for voxel fragment list (normal)
+	// GLuint voxelNrmlTbo = 0;  //texture buffer object for voxel fragment list (normal)
+
+	//// Texture
 	Texture2 fontmap;
-	Texture3 tex3;
+
+
 	glm::mat4 model, view, projection;
 	float delta = 0.f;
 public:

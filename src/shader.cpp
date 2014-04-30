@@ -27,68 +27,47 @@
 
 Shader::Shader()
 {
-	// stage[GL_VERTEX_SHADER] = 0;
-	// stage[GL_GEOMETRY_SHADER] = 0;
-	// stage[GL_FRAGMENT_SHADER] = 0;
 	ext_enum = std::unordered_map<std::string, GLenum>{
 		{ "vert", GL_VERTEX_SHADER },
 		{ "geom", GL_GEOMETRY_SHADER },
-		{ "frag", GL_FRAGMENT_SHADER }
+		{ "frag", GL_FRAGMENT_SHADER },
+		{ "comp", GL_COMPUTE_SHADER }
 	};
 	program = glCreateProgram();
 }
 Shader::~Shader()
 {
-	//glDetachShader(program, vertex);
-	//glDetachShader(program, fragment);
-	//glDeleteShader(vertex);
-	//glDeleteShader(fragment);
 	for(auto& s : stage)
 	{
-		// std::cout << "stage " << s.second << std::endl;
 		glDetachShader(program, s.second);
 		glDeleteShader(s.second);
 	}
 
-	// std::cout << "program " << program << std::endl;
 	glDeleteProgram(program);
 }
 
-Shader::Shader(Shader&& s) : program(s.program),/* vertex(s.vertex), fragment(s.fragment),*/ uniforms(std::move(s.uniforms)), stage(std::move(s.stage))
+Shader::Shader(Shader&& s) : program(s.program), uniforms(std::move(s.uniforms)), attribs(std::move(s.attribs)), stage(std::move(s.stage))
 {
-	// s.program = 0;
-	// s.vertex = 0;
-	// s.fragment = 0;
+	s.program = 0;
 }
 Shader& Shader::operator=(Shader&& s)
 {
 	assert(this != &s);
-	// glDetachShader(program, vertex);hader.setStage("shader/uv.vert");
-	// shader.setStage("shader/uv.frag");
-	// shader.link();
-	// glDetachShader(program, fragment);
-	// glDeleteShader(vertex);
-	// glDeleteShader(fragment);
-	// glDeleteProgram(program);
+
 	for(auto& st : stage)
 	{
-		// std::cout << "stage " << st.second << std::endl;
 		glDetachShader(program, st.second);
 		glDeleteShader(st.second);
 	}
 
-	// std::cout << "program " << program << std::endl;
 	glDeleteProgram(program);
 
 	program = s.program;
-	// vertex = s.vertex;
-	// fragment = s.fragment;
 	uniforms = std::move(s.uniforms);
+	attribs = std::move(s.attribs);
 	stage = std::move(s.stage);
 
 	s.program = 0;
-	// s.vertex = 0;
-	// s.fragment = 0;
 	return *this;
 }
 
@@ -109,38 +88,10 @@ void Shader::setStage(const std::string& _filename)
 	}
 	glAttachShader(program, handle);
 	stage[type] = handle;
-	// auto banana = stage.size();
-	// std::cout << banana << std::endl;
 }
-// void setVertex(const std::string& _filename)
-// {
-// 	std::string source(static_cast<std::stringstream const&>(std::stringstream() << std::ifstream(_filename).rdbuf()).str());
-// 	vertex = compile_shader(source, GL_VERTEX_SHADER);
-// 	if(!vertex)
-// 	{
-// 		std::cout << "failed to compile " << _filename << std::endl;
-// 	}
-// 	// vert_init = true;
-// }
-// void setFragment(const std::string& _filename)
-// {
-// 	std::string source(static_cast<std::stringstream const&>(std::stringstream() << std::ifstream(_filename).rdbuf()).str());
-// 	fragment = compile_shader(source, GL_FRAGMENT_SHADER);
-// 	if(!fragment)
-// 	{
-// 		std::cout << "failed to compile " << _filename << std::endl;
-// 	}
-// 	// frag_init = true;
-// }
+
 void Shader::link()
 {
-	// if(!vertex || !fragment)
-	// {
-	// 	std::cout << "invalid shader stage" << std::endl;
-	// 	return;
-	// }
-	// glAttachShader(program, vertex);
-	// glAttachShader(program, fragment);
 	glLinkProgram(program);
 
 	GLint status = 0;
@@ -157,7 +108,6 @@ void Shader::link()
 	{
 		load_uniform();
 		load_attrib();
-		// prog_init = true;
 	}
 }
 
@@ -167,23 +117,23 @@ void Shader::bind()
 }
 void Shader::load(const std::string& _name, const GLfloat _data)
 {
-	glUniform1f(uniforms.at(_name), _data);
+	glProgramUniform1f(program, uniforms.at(_name), _data);
 }
 void Shader::load(const std::string& _name, const GLint _data)
 {
-	glUniform1i(uniforms.at(_name), _data);
+	glProgramUniform1i(program, uniforms.at(_name), _data);
 }
 void Shader::load(const std::string& _name, const glm::vec2& _data)
 {
-	glUniform2fv(uniforms.at(_name), 1, &_data[0]);
+	glProgramUniform2fv(program, uniforms.at(_name), 1, &_data[0]);
 }
 void Shader::load(const std::string& _name, const glm::vec3& _data)
 {
-	glUniform3fv(uniforms.at(_name), 1, &_data[0]);
+	glProgramUniform3fv(program, uniforms.at(_name), 1, &_data[0]);
 }
 void Shader::load(const std::string& _name, const glm::mat4& _data)
 {
-	glUniformMatrix4fv(uniforms.at(_name), 1, GL_FALSE, &_data[0][0]);
+	glProgramUniformMatrix4fv(program, uniforms.at(_name), 1, GL_FALSE, &_data[0][0]);
 }
 GLuint Shader::attrib(const std::string& _name)
 {

@@ -32,29 +32,38 @@ application::application(GLFWwindow* _win) : win(_win)
 	glfwGetWindowSize(win, &w_width, &w_height);
 	glfwGetFramebufferSize(win, &f_width, &f_height);
 
-	shader_voxelize.setStage("shader/voxel.vert");
-	shader_voxelize.setStage("shader/voxel.geom");
-	shader_voxelize.setStage("shader/voxel.frag");
-	shader_voxelize.link();
+	render_shader.setStage("shader/render_voxel.vert");
+	render_shader.setStage("shader/render_voxel.geom");
+	render_shader.setStage("shader/render_voxel.frag");
+	render_shader.link();
 
-	shader_ray.setStage("shader/ray.vert");
-	shader_ray.setStage("shader/ray.frag");
-	shader_ray.link();
+	voxelize_shader.setStage("shader/voxel.vert");
+	voxelize_shader.setStage("shader/voxel.geom");
+	voxelize_shader.setStage("shader/voxel.frag");
+	voxelize_shader.link();
+
+	// octree_to_3D_shader.setStage("shader/oto3D.comp");
+	// octree_to_3D_shader.link();
+
+	// shader_ray.setStage("shader/ray.vert");
+	// shader_ray.setStage("shader/ray.frag");
+	// shader_ray.link();
 
 	fontmap.file("assets/verasansmono.png");
-	shader_text.setStage("shader/text.vert");
-	shader_text.setStage("shader/text.geom");
-	shader_text.setStage("shader/text.frag");
-	shader_text.link();
-	shader_text.bind();
-	shader_text.load("textcolor", glm::vec3(1.f, 1.f, 1.f));
-	shader_text.load("cellsize", glm::vec2(1.f/16, (300.f/384)/6));
-	shader_text.load("celloffset", glm::vec2(.5f/256.f, .5f/256.f));
-	shader_text.load("rendersize", glm::vec2(.75f * 16 / f_width, .75f * 33.33 / f_height));
-	shader_text.load("renderorigin", glm::vec2(-.96f, .9f));
+
+	text_shader.setStage("shader/text.vert");
+	text_shader.setStage("shader/text.geom");
+	text_shader.setStage("shader/text.frag");
+	text_shader.link();
+
+	text_shader.load("textcolor", glm::vec3(1.f, 1.f, 1.f));
+	text_shader.load("cellsize", glm::vec2(1.f/16, (300.f/384)/6));
+	text_shader.load("celloffset", glm::vec2(.5f/256.f, .5f/256.f));
+	text_shader.load("rendersize", glm::vec2(.75f * 16 / f_width, .75f * 33.33 / f_height));
+	text_shader.load("renderorigin", glm::vec2(-.96f, .9f));
 
 	text.vertices(nullptr, 256);
-	text.addVertexAttribI(shader_text.attrib("character"), 1, sizeof(char), 0);
+	text.addVertexAttribI(text_shader.attrib("character"), 1, sizeof(char), 0);
 
 	Sphere<100, 100> sph(256.f);
 	sphere.vertices(sph.vertices.data(), sph.vertices.size()*sizeof(vertex));
@@ -83,11 +92,11 @@ application::application(GLFWwindow* _win) : win(_win)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
-	tex3.alloc(512,512,512);
-	tex3.clear();
-	shader_voxelize.bind();
-	shader_voxelize.load("pixel_diagonal", float(sqrt(2.f) * 1.f / 512));
-	std::cout <<"texture 3d " << tex3.getUnit() << std::endl;
+	// tex3.alloc(512,512,512);
+	// tex3.clear();
+	voxelize_shader.bind();
+	voxelize_shader.load("pixel_diagonal", float(sqrt(2.f) * 1.f / 512));
+	// std::cout <<"texture 3d " << tex3.getUnit() << std::endl;
 }
 
 void application::update(float dt)
@@ -115,32 +124,32 @@ void application::draw()
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-		tex3.clear();
-		shader_voxelize.bind();
-		shader_voxelize.load("model", model);
-		shader_voxelize.load("view", glm::mat4());
-		shader_voxelize.load("projection", glm::ortho(-256.f, 256.f, -256.f, 256.f, -256.f, 256.f));
-		tex3.bindImage(GL_R32UI, GL_WRITE_ONLY);
+		// tex3.clear();
+		voxelize_shader.bind();
+		voxelize_shader.load("model", model);
+		voxelize_shader.load("view", glm::mat4());
+		voxelize_shader.load("projection", glm::ortho(-256.f, 256.f, -256.f, 256.f, -256.f, 256.f));
+		// tex3.bindImage(GL_R32UI, GL_WRITE_ONLY);
 		sphere.draw();
 	}
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	{
-		glViewport(0,0, f_width, f_height);
-		glEnable(GL_DEPTH_TEST);
-		glDepthMask(GL_TRUE);
-		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-		shader_ray.bind();
-		shader_ray.load("mvp_inverse", glm::inverse(projection * view /** model*/));
-		//shader_ray.load("MVP", glm::rotate(glm::mat4(1.f), tau/4.f, glm::vec3(1.f,0.f,0.f)));
-		tex3.bindImage(GL_R32UI, GL_READ_ONLY);
-		quad.draw();
-	}
+	// {
+	// 	glViewport(0,0, f_width, f_height);
+	// 	glEnable(GL_DEPTH_TEST);
+	// 	glDepthMask(GL_TRUE);
+	// 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	// 	shader_ray.bind();
+	// 	shader_ray.load("mvp_inverse", glm::inverse(projection * view /** model*/));
+	// 	//shader_ray.load("MVP", glm::rotate(glm::mat4(1.f), tau/4.f, glm::vec3(1.f,0.f,0.f)));
+	// 	tex3.bindImage(GL_R32UI, GL_READ_ONLY);
+	// 	quad.draw();
+	// }
 	{
 		glEnable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
 		fontmap.bind();
 
-		shader_text.bind();
+		text_shader.bind();
 		std::string test = "ms: " + std::to_string(delta);
 
 		text.vertices(test.data(), test.size());

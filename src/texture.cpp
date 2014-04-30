@@ -31,7 +31,7 @@ Texture2::Texture2(GLuint _unit) : unit(_unit)
 	glGenTextures(1, &handle);
 	glActiveTexture(GL_TEXTURE0 + unit);
 	glBindTexture(GL_TEXTURE_2D, handle);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -54,6 +54,12 @@ Texture2& Texture2::operator=(Texture2&& t)
 	t.handle = 0;
 	return *this;
 }
+
+void Texture2::alloc(GLsizei _size_x, GLsizei _size_y)
+{
+	bind();
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _size_x, _size_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+}
 void Texture2::file(const std::string& _filename)
 {
 	std::vector<GLubyte> image;
@@ -63,6 +69,7 @@ void Texture2::file(const std::string& _filename)
 		std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 	
 	bind();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
@@ -106,8 +113,8 @@ void Texture3::alloc(GLsizei _size_x, GLsizei _size_y, GLsizei _size_z)
 {
 	bind();
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_R32UI, _size_x, _size_y, _size_z, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
-	clear();
-	glGenerateMipmap(GL_TEXTURE_3D);
+	// clear();
+	// glGenerateMipmap(GL_TEXTURE_3D);
 }
 void Texture3::clear()
 {

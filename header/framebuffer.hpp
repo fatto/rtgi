@@ -19,48 +19,33 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef rtgi_shader_hpp
-#define rtgi_shader_hpp
-
-#include <glm/glm.hpp>
-#include <string>
-#include <unordered_map>
-// #include <regex>
+#ifndef rtgi_framebuffer_hpp
+#define rtgi_framebuffer_hpp
 
 #include "glwrap.hpp"
 
-class Shader
+class FrameBuffer
 {
 private:
-	GLuint program;
-	std::unordered_map<std::string, GLuint> uniforms;
-	std::unordered_map<std::string, GLuint> attribs;
-	std::unordered_map<GLenum, GLuint> stage;
-	std::unordered_map<std::string, GLenum> ext_enum;
+	GLuint fb;
+	GLuint colors = 0;
+	GLuint depth;
 public:
-	Shader();
-	~Shader();
+	FrameBuffer();
+	~FrameBuffer();
 
-	Shader(const Shader&) = delete;
-	Shader& operator=(const Shader&) = delete;
+	FrameBuffer(const FrameBuffer&) = delete;
+	FrameBuffer& operator=(const FrameBuffer&) = delete;
 
-	Shader(Shader&& s);
-	Shader& operator=(Shader&& s);
+	FrameBuffer(FrameBuffer&& s);
+	FrameBuffer& operator=(FrameBuffer&& s);
 
-	void setStage(const std::string& _filename);
-	void link();
+	void addColor(const GLuint _handle);
+	void setDepth(const GLuint _handle);
+	void check();
 
 	void bind();
-	void load(const std::string& _name, const GLfloat _data);
-	void load(const std::string& _name, const GLint _data);
-	void load(const std::string& _name, const glm::vec2& _data);
-	void load(const std::string& _name, const glm::vec3& _data);
-	void load(const std::string& _name, const glm::mat4& _data);
-	GLuint attrib(const std::string& _name);
-private:
-	GLuint compile_shader(const std::string& source, GLenum type) const;
-	void load_uniform();
-	void load_attrib();
+	void unbind();
 };
 
 #endif
