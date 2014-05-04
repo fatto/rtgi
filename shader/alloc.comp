@@ -1,0 +1,28 @@
+layout(local_size_x = 64) in;
+
+uniform uint start;
+uniform uint alloc_start;
+uniform uint num;
+
+layout(binding = 0, offset = 0) uniform atomic_uint alloc_count;
+
+layout(binding = 3, r32ui) uniform uimageBuffer octree_buffer;
+
+void main()
+{
+	uint th_id = gl_GlobalInvocationID.x;
+	if(th_id >= num)
+		return;
+
+	uint offset;
+	uint child_id = imageLoad(octree_buffer, int(start + th_id)).r;
+
+	if((child_id & 0x80000000) != 0) // need to be allocated
+	{
+		offset = atomicCounterIncrement(alloc_count);
+		offset *= 8;
+		offset += alloc_start;
+		offset |= 0x80000000;
+		imageStore(octree_buffer, int(start + th_id), uvec4(offset, 0, 0, 0));
+	}
+}

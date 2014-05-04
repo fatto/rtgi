@@ -115,13 +115,21 @@ void Shader::bind()
 {
 	glUseProgram(program);
 }
-void Shader::load(const std::string& _name, const GLfloat _data)
+void Shader::load(const std::string& _name, const GLboolean _data)
 {
-	glProgramUniform1f(program, uniforms.at(_name), _data);
+	glProgramUniform1i(program, uniforms.at(_name), _data);
 }
 void Shader::load(const std::string& _name, const GLint _data)
 {
 	glProgramUniform1i(program, uniforms.at(_name), _data);
+}
+void Shader::load(const std::string& _name, const GLuint _data)
+{
+	glProgramUniform1ui(program, uniforms.at(_name), _data);
+}
+void Shader::load(const std::string& _name, const GLfloat _data)
+{
+	glProgramUniform1f(program, uniforms.at(_name), _data);
 }
 void Shader::load(const std::string& _name, const glm::vec2& _data)
 {
@@ -152,9 +160,9 @@ GLuint Shader::compile_shader(const std::string& source, GLenum type) const
 	glCompileShader(handle);
 
 	{
-		GLchar log[256];
+		GLchar log[512];
 		GLsizei slen = 0;
-		glGetShaderInfoLog(handle, 256, &slen, log);
+		glGetShaderInfoLog(handle, 512, &slen, log);
 		if(slen)
 			std::cout << log << std::endl;
 	}

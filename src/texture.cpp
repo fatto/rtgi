@@ -174,8 +174,8 @@ void TextureBuffer::bind()
 }
 void TextureBuffer::bindImage(GLenum _format, GLenum _access, GLint _level)
 {
-	glActiveTexture(GL_TEXTURE0 + unit);
-	glBindImageTexture(unit, handle, _level, GL_TRUE, 0, _access, _format);
+	//glActiveTexture(GL_TEXTURE0 + unit);
+	glBindImageTexture(unit, handle, _level, GL_FALSE, 0, _access, _format);
 }
 GLuint TextureBuffer::getUnit()
 {

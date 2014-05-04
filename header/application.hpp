@@ -26,6 +26,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "glwrap.hpp"
+#include "buffer.hpp"
 #include "geometry.hpp"
 #include "texture.hpp"
 #include "shader.hpp"
@@ -42,16 +43,17 @@ class application
 	Geometry quad;
 	Geometry text;
 
+	Buffer counter_frag;
+	Buffer counter_node;
 	//// Shader
 	Shader text_shader;
 	// rendering
 	Shader render_shader;
 	// svo construction
 	Shader voxelize_shader;
-	Shader node_flag_shader;
-	Shader node_alloc_shader;
-	Shader node_init_shader;
-	Shader leaf_store_shader;
+	Shader flag_shader;
+	Shader alloc_shader;
+	Shader store_shader;
 	Shader mipmap_node_shader;
 	// deferred
 	Shader pass_shader;
@@ -61,8 +63,8 @@ class application
 	// Shader shader_ray;
 
 	// voxel dimension
-	int voxel_dim = 128;
-	int octree_level = 7;
+	unsigned int voxel_dim = 256;
+	unsigned int octree_level = 7;
 	unsigned int num_voxel_frag = 0;
 	// voxel creation buffers
 	// GLuint voxelTex = 0;   //3D texture
@@ -75,6 +77,32 @@ class application
 
 	//// Texture
 	Texture2 fontmap;
+
+	Buffer buffer_voxel_position;
+	TextureBuffer voxel_position;
+
+	Buffer buffer_voxel_diffuse;
+	TextureBuffer voxel_diffuse;
+
+	Buffer buffer_voxel_normal;
+	TextureBuffer voxel_normal;
+
+	Buffer buffer_octree_buffer;
+	TextureBuffer octree_buffer;
+
+	Buffer buffer_octree_diffuse_r;
+	TextureBuffer octree_diffuse_r;
+
+	Buffer buffer_octree_diffuse_g;
+	TextureBuffer octree_diffuse_g;
+
+	Buffer buffer_octree_diffuse_b;
+	TextureBuffer octree_diffuse_b;
+
+	Buffer buffer_octree_diffuse_a;
+	TextureBuffer octree_diffuse_a;
+
+	GLuint max_frag = 0;
 
 
 	glm::mat4 model, view, projection;

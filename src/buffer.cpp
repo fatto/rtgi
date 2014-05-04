@@ -51,6 +51,10 @@ void Buffer::bind()
 {
 	glBindBuffer(type, handle);
 }
+void Buffer::bindBase(GLuint _index)
+{
+	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, _index, handle);
+}
 void Buffer::unbind()
 {
 	glBindBuffer(type, 0);
@@ -59,14 +63,23 @@ void Buffer::data(const void* _data, size_t _size)
 {
 	bind();
 	glBufferData(type, _size, _data, usage);
-	unbind();
 }
 void Buffer::dataUpdate(const void* _data, size_t _size)
 {
 	bind();
 	glBufferSubData(type, 0, _size, _data);
-	unbind();
 }
+void Buffer::get(void* _data, size_t _size)
+{
+	bind();
+	glGetBufferSubData(type, 0, _size, _data);
+}
+void Buffer::clear(GLenum _internal_format, GLenum _format, GLenum _type)
+{
+	bind();
+	glClearBufferData(type, _internal_format, _format, _type, NULL);
+}
+
 GLuint Buffer::getName()
 {
 	return handle;

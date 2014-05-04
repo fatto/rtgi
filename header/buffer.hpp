@@ -40,9 +40,14 @@ public:
 	Buffer& operator=(Buffer&& b);
 
 	void bind();
+	void bindBase(GLuint _index = 0);
 	void unbind();
 	void data(const void* _data, size_t _size);
 	void dataUpdate(const void* _data, size_t _size);
+	void get(void* _data, size_t _size);
+	void clear(GLenum _internal_format, GLenum _format, GLenum _type);
+
+	
 	GLuint getName();
 };
 

@@ -33,6 +33,9 @@
     <ClCompile Include="..\src\gl_core_4_4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\framebuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\header\buffer.hpp">
@@ -53,10 +56,13 @@
     <ClInclude Include="..\header\texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\header\gl_core_4_4.hpp">
+    <ClInclude Include="..\header\application.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\header\application.hpp">
+    <ClInclude Include="..\header\framebuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\header\gl_core_4_4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

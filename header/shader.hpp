@@ -51,8 +51,10 @@ public:
 	void link();
 
 	void bind();
-	void load(const std::string& _name, const GLfloat _data);
+	void load(const std::string& _name, const GLboolean _data);
 	void load(const std::string& _name, const GLint _data);
+	void load(const std::string& _name, const GLuint _data);
+	void load(const std::string& _name, const GLfloat _data);
 	void load(const std::string& _name, const glm::vec2& _data);
 	void load(const std::string& _name, const glm::vec3& _data);
 	void load(const std::string& _name, const glm::mat4& _data);
