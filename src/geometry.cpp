@@ -67,11 +67,6 @@ void Geometry::draw()
 
 void Geometry::drawArray(GLsizei _count)
 {
-	if(!vert_init || !vao_init)
-	{
-		std::cout << "incomplete geometry status" << std::endl;
-		return;
-	}
 	glBindVertexArray(vao);
 	glDrawArrays(GL_POINTS, 0, _count);
 }

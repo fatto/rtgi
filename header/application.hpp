@@ -42,6 +42,7 @@ class application
 	Geometry sphere;
 	Geometry quad;
 	Geometry text;
+	Geometry dummy;
 
 	Buffer counter_frag;
 	Buffer counter_node;
@@ -54,7 +55,9 @@ class application
 	Shader flag_shader;
 	Shader alloc_shader;
 	Shader store_shader;
-	Shader mipmap_node_shader;
+	Shader mipmap_shader;
+	// render voxel
+	Shader render_voxel_shader;
 	// deferred
 	Shader pass_shader;
 	Shader deferred_shader;

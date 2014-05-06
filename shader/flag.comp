@@ -18,7 +18,7 @@ void main()
 	uvec4 location = imageLoad(voxel_position, int(th_id)); // voxel coordinates o voxel loaded by this thread
 	uint child_id = 0;
 	uint node = imageLoad(octree_buffer, int(child_id)).r;
-	uint subnode;
+	uvec3 offset;
 	uint voxel_dimension = voxel_dim;
 	bool flag = true;
 
@@ -33,14 +33,17 @@ void main()
 
 		child_id = (node & 0x7fffffff); // get child id masking out flag bit
 
-		subnode =      clamp(int(1+location.x-umin.x-voxel_dimension), 0, 1);
-		subnode += 4 * clamp(int(1+location.y-umin.y-voxel_dimension), 0, 1);
-		subnode += 2 * clamp(int(1+location.z-umin.z-voxel_dimension), 0, 1);
-		child_id += subnode;
+		// offset =      clamp(int(1+location.x-umin.x-voxel_dimension), 0, 1);
+		// offset += 4 * clamp(int(1+location.y-umin.y-voxel_dimension), 0, 1);
+		// offset += 2 * clamp(int(1+location.z-umin.z-voxel_dimension), 0, 1);
+		offset = clamp(ivec3(1 + location.xyz - umin - voxel_dimension), 0, 1);
+		child_id += offset.x + 4 * offset.y + 2 * offset.z;
 
-		umin.x += voxel_dimension * clamp(int(1+location.x-umin.x-voxel_dimension), 0, 1);
-		umin.y += voxel_dimension * clamp(int(1+location.y-umin.y-voxel_dimension), 0, 1);
-		umin.z += voxel_dimension * clamp(int(1+location.z-umin.z-voxel_dimension), 0, 1);
+		// umin.x += voxel_dimension * clamp(int(1+location.x-umin.x-voxel_dimension), 0, 1);
+		// umin.y += voxel_dimension * clamp(int(1+location.y-umin.y-voxel_dimension), 0, 1);
+		// umin.z += voxel_dimension * clamp(int(1+location.z-umin.z-voxel_dimension), 0, 1);
+
+		umin += voxel_dimension * offset;
 
 		node = imageLoad(octree_buffer, int(child_id)).r;
 	}

@@ -68,6 +68,12 @@ application::application(GLFWwindow* _win) :
 	store_shader.setStage("shader/store.comp");
 	store_shader.link();
 
+	render_voxel_shader.setStage("shader/render_voxel.vert");
+	render_voxel_shader.setStage("shader/render_voxel.geom");
+	render_voxel_shader.setStage("shader/render_voxel.frag");
+	render_voxel_shader.link();
+	
+
 	// octree_to_3D_shader.setStage("shader/oto3D.comp");
 	// octree_to_3D_shader.link();
 
@@ -104,10 +110,9 @@ application::application(GLFWwindow* _win) :
 	quad.indices(fullscreen_quad.indices.data(), fullscreen_quad.indices.size()*sizeof(face));
 	quad.addVertexAttrib(0, 3, sizeof(vertex), offsetof_ptr(vertex, pos));
 
-
 	model = glm::mat4(1.f);
 	// model = glm::translate(model, glm::vec3(64.f, 64.f, 64.f));
-	// view = glm::translate(glm::mat4(1.0f), glm::vec3(-128.0f, -128.0f, -950.f));
+	view = glm::lookAt(glm::vec3(0.f, 0.f, -3.f), glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
 	projection = glm::perspective(tau/6.f, float(w_width)/float(w_height), .1f, 4500.f);
 
 
@@ -173,7 +178,6 @@ void application::update(float dt)
 void application::draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, f_width, f_height);
 	
 //	shader_color.bind();
 //	shader_color.load("model", model);
@@ -260,7 +264,7 @@ void application::draw()
 
 		for(size_t i = 0; i < octree_level; ++i)
 		{
-			// flag node
+			// flag nodes
 			flag_shader.bind();
 			flag_shader.load("voxel_frag_count", num_frag);
 			flag_shader.load("level", GLuint(i));
@@ -295,7 +299,7 @@ void application::draw()
 			node_offset += alloc_list[i];
 			alloc_offset += node_allocated;
 		}
-		// flag nonempty leaf
+		// flag nonempty leaves
 		flag_shader.bind();
 		flag_shader.load("voxel_frag_count", num_frag);
 		flag_shader.load("level", GLuint(octree_level));
@@ -319,6 +323,8 @@ void application::draw()
 		octree_diffuse_a.bindImage(GL_R32UI);
 		glDispatchCompute(group_dim_x, group_dim_y, 1);
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+		// TODO mip-mapping
 	}
 	{
 		glEnable(GL_CULL_FACE);
@@ -326,6 +332,22 @@ void application::draw()
 		glDepthMask(GL_TRUE);
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 		glViewport(0,0, f_width, f_height);
+	}
+	{
+		render_voxel_shader.bind();
+		render_voxel_shader.load("model", glm::mat4(1.f));
+		render_voxel_shader.load("view", view);
+		render_voxel_shader.load("projection", projection);
+		render_voxel_shader.load("voxel_dim", GLuint(voxel_dim));
+		render_voxel_shader.load("level", GLuint(octree_level));
+		render_voxel_shader.load("half_cube", 1.f/float(voxel_dim));
+		octree_buffer.bindImage(GL_R32UI, GL_READ_ONLY);
+		octree_diffuse_r.bindImage(GL_R32UI, GL_READ_ONLY);
+		octree_diffuse_g.bindImage(GL_R32UI, GL_READ_ONLY);
+		octree_diffuse_b.bindImage(GL_R32UI, GL_READ_ONLY);
+		octree_diffuse_a.bindImage(GL_R32UI, GL_READ_ONLY);
+
+		dummy.drawArray(voxel_dim * voxel_dim * voxel_dim);
 	}
 	// glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	// {
