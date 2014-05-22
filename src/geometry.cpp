@@ -21,8 +21,16 @@
 
 #include <cassert>
 #include <iostream>
+#include <sstream>
+#include <fstream>
+#include <algorithm>
+#include <numeric>
+#include <unordered_map>
+#include <functional>
+#include <regex>
 
 #include "geometry.hpp"
+#include "json11.hpp"
 
 Geometry::Geometry() : vert(GL_ARRAY_BUFFER, GL_STATIC_DRAW), ind(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW), vao(0), size(0)
 {
@@ -118,4 +126,87 @@ void Geometry::addVertexAttribI(GLuint _index, GLint _size, GLuint _stride, cons
 	vert.unbind();
 
 	vao_init = true;
+}
+
+struct Attrib
+{
+	GLint components;
+	GLenum type;
+	GLint size;
+};
+
+Geometry Geometry::fromFile(std::string _filename)
+{
+	Geometry g;
+
+	std::string source(static_cast<std::stringstream const&>(std::stringstream() << std::ifstream(_filename).rdbuf()).str());
+	std::string error;
+	auto json = json11::Json::parse(source, error);
+	if (!error.empty())
+	{
+		std::cout << "failed: " << error << std::endl;
+		return g;
+	}
+
+	auto version = json["version"].array_items();
+	std::vector<int> version_v;
+	std::transform(version.begin(), version.end(), std::back_inserter(version_v), [](const json11::Json& j){return j.integer_value(); });
+
+	assert((version == json11::Json::array{0, 1}));
+
+	auto meshes = json["meshes"].array_items();
+	auto attributes = meshes[0]["attributes"].array_items(); // TODO arbitrary number of meshes
+	std::vector<std::string> attributes_v;
+	std::transform(attributes.begin(), attributes.end(), std::back_inserter(attributes_v), [](const json11::Json& j){return j.string_value(); });
+
+	std::unordered_map<std::string, Attrib, std::function<size_t(std::string)>, std::function<bool(const std::string&, const std::string)>> attributes_hash(
+		3,
+		[](const std::string& s) {
+		std::regex re("([0-9]*)");
+		std::smatch sm;
+		std::regex_search(s, sm, re);
+		return std::hash<std::string>()(sm.prefix().str());
+	},
+		[](const std::string& me, const std::string& s)
+	{
+		return s.find(me) != std::string::npos;
+	}
+	);
+	attributes_hash["POSITION"] = { 3, GL_FLOAT, 3 * sizeof(float) };
+	attributes_hash["NORMAL"] = { 3, GL_FLOAT, 3 * sizeof(float) };
+	attributes_hash["TEXCOORD"] = { 2, GL_FLOAT, 2 * sizeof(float) };
+
+	GLuint v_size = 0; // total vertex size
+	std::vector<size_t> offset; // per attribute offset
+	std::vector<GLint> components; // per attribute number of components
+	for (auto& a : attributes_v)
+	{
+		offset.push_back(v_size);
+		components.push_back(attributes_hash[a].components);
+		v_size += attributes_hash[a].size;
+	}
+
+	for (GLint i = 0; i < offset.size(); ++i)
+	{
+		// TODO check if type is float or int
+		g.addVertexAttrib(i, components[i], v_size, (void*)offset[i]);
+	}
+
+	auto vertices = meshes[0]["vertices"].array_items();
+	std::vector<float> vertices_v;
+	std::transform(vertices.begin(), vertices.end(), std::back_inserter(vertices_v), [](const json11::Json& j){ return j.number_value(); });
+
+	g.vertices(vertices_v.data(), vertices_v.size()*sizeof(float));
+
+	auto parts = meshes[0]["parts"].array_items();
+	std::vector<GLuint> indices_v;
+	for (auto& p : parts)
+	{
+		auto i = p["indices"].array_items();
+		std::transform(i.begin(), i.end(), std::back_inserter(indices_v), [](const json11::Json& j){ return j.integer_value(); });
+	}
+
+	g.indices(indices_v.data(), indices_v.size()*sizeof(GLuint));
+
+	return g;
 }

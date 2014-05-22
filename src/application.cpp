@@ -29,23 +29,23 @@
 
 application::application(GLFWwindow* _win) :
 		win(_win),
-		counter_frag(GL_ATOMIC_COUNTER_BUFFER, GL_STATIC_DRAW),
-		counter_node(GL_ATOMIC_COUNTER_BUFFER, GL_STATIC_DRAW),
-		buffer_voxel_position(GL_TEXTURE_BUFFER, GL_STATIC_DRAW),
+		counter_frag(GL_ATOMIC_COUNTER_BUFFER, GL_STATIC_READ),
+		counter_node(GL_ATOMIC_COUNTER_BUFFER, GL_STATIC_READ),
+		buffer_voxel_position(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
 		voxel_position(0),
-		buffer_voxel_diffuse(GL_TEXTURE_BUFFER, GL_STATIC_DRAW),
+		buffer_voxel_diffuse(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
 		voxel_diffuse(1),
-		buffer_voxel_normal(GL_TEXTURE_BUFFER, GL_STATIC_DRAW),
+		buffer_voxel_normal(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
 		voxel_normal(2),		
-		buffer_octree_buffer(GL_TEXTURE_BUFFER, GL_STATIC_DRAW),
+		buffer_octree_buffer(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
 		octree_buffer(3),
-		buffer_octree_diffuse_r(GL_TEXTURE_BUFFER, GL_STATIC_DRAW),
+		buffer_octree_diffuse_r(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
 		octree_diffuse_r(4),
-		buffer_octree_diffuse_g(GL_TEXTURE_BUFFER, GL_STATIC_DRAW),
+		buffer_octree_diffuse_g(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
 		octree_diffuse_g(5),
-		buffer_octree_diffuse_b(GL_TEXTURE_BUFFER, GL_STATIC_DRAW),
+		buffer_octree_diffuse_b(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
 		octree_diffuse_b(6),
-		buffer_octree_diffuse_a(GL_TEXTURE_BUFFER, GL_STATIC_DRAW),
+		buffer_octree_diffuse_a(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
 		octree_diffuse_a(7)
 {
 	glfwGetWindowSize(win, &w_width, &w_height);
@@ -97,13 +97,15 @@ application::application(GLFWwindow* _win) :
 	text.vertices(nullptr, 256);
 	text.addVertexAttribI(text_shader.attrib("character"), 1, sizeof(char), 0);
 
-	Sphere<100, 100> sph(.75f);
+	/*Sphere<100, 100> sph(.75f);
 	sphere.vertices(sph.vertices.data(), sph.vertices.size()*sizeof(vertex));
 	sphere.indices(sph.indices.data(), sph.indices.size()*sizeof(face));
 	sphere.addVertexAttrib(0, 3, sizeof(vertex), offsetof_ptr(vertex, pos));
-	sphere.addVertexAttrib(1, 3, sizeof(vertex), offsetof_ptr(vertex, norm));
+	sphere.addVertexAttrib(1, 3, sizeof(vertex), offsetof_ptr(vertex, norm));*/
 	// sphere.addVertexAttrib(shader.attrib("uv"), 2, sizeof(vertex), offsetof_ptr(vertex, text));
 
+	//sphere = Geometry::fromFile("assets/cornell.g3dj");
+	sphere = Geometry::fromFile("assets/sphere.g3dj");
 
 	Plane<1> fullscreen_quad(2.f);
 	quad.vertices(fullscreen_quad.vertices.data(), fullscreen_quad.vertices.size()*sizeof(vertex));
@@ -112,7 +114,7 @@ application::application(GLFWwindow* _win) :
 
 	model = glm::mat4(1.f);
 	// model = glm::translate(model, glm::vec3(64.f, 64.f, 64.f));
-	view = glm::lookAt(glm::vec3(0.f, 0.f, -3.f), glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
+	view = glm::lookAt(glm::vec3(1.f, 1.f, -2.5f), glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
 	projection = glm::perspective(tau/6.f, float(w_width)/float(w_height), .1f, 4500.f);
 
 
@@ -171,7 +173,7 @@ void application::update(float dt)
 {
 	if(glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(win, GL_TRUE);
-	model = glm::rotate(model, dt, glm::vec3(1.f, 1.f, .0f));
+	model = glm::rotate(model, dt, glm::vec3(0.f, 1.f, 0.f));
 	delta = dt;
 }
 
@@ -196,10 +198,10 @@ void application::draw()
 	// count number of fragment
 	{
 		// tex3.clear();
-		auto ortho = glm::ortho(-1.f, 1.f, -1.f, 1.f, 2.f-1.f, 3.f);
-		auto vp_x = ortho * glm::lookAt(glm::vec3(2, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-		auto vp_y = ortho * glm::lookAt(glm::vec3(0, 2, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, -1));
-		auto vp_z = ortho * glm::lookAt(glm::vec3(0, 0, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		auto ortho = glm::ortho(-half_volume_size, half_volume_size, -half_volume_size, half_volume_size, (2.f*half_volume_size)-half_volume_size, (2.f*half_volume_size)+half_volume_size);
+		auto vp_x = ortho * glm::lookAt(glm::vec3((2.f*half_volume_size), 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		auto vp_y = ortho * glm::lookAt(glm::vec3(0, (2.f*half_volume_size), 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, -1));
+		auto vp_z = ortho * glm::lookAt(glm::vec3(0, 0, (2.f*half_volume_size)), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 		voxelize_shader.bind();
 		voxelize_shader.load("store", GL_FALSE);
 		voxelize_shader.load("pixel_diagonal", float(sqrt(2.f) * 1.f / voxel_dim));
@@ -367,7 +369,7 @@ void application::draw()
 		fontmap.bind();
 
 		text_shader.bind();
-		std::string test = "ms: " + std::to_string(delta) + " fragments: " + std::to_string(num_frag) + " " + std::to_string(max_frag);
+		std::string test = "s: " + std::to_string(delta) + " fragments: " + std::to_string(num_frag) + " " + std::to_string(max_frag);
 		text.vertices(test.data(), test.size());
 		text.drawArray(test.size());
 		glDisable(GL_BLEND);

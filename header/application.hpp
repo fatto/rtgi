@@ -65,6 +65,9 @@ class application
 	Shader octree_to_3D_shader;
 	// Shader shader_ray;
 
+	// voxelization size
+	float half_volume_size = 1.5f;
+
 	// voxel dimension
 	unsigned int voxel_dim = 256;
 	unsigned int octree_level = 7;

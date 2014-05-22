@@ -66,6 +66,8 @@ public:
 	// _index index of vertex attribute, _size number of components(1..4), _stride total vertex size, _offset byte offset into buffer
 	void addVertexAttrib(GLuint _index, GLint _size, GLuint _stride, const GLvoid* _offset);
 	void addVertexAttribI(GLuint _index, GLint _size, GLuint _stride, const GLvoid* _offset);
+
+	static Geometry fromFile(std::string _filename);
 };
 
 
