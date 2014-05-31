@@ -135,7 +135,7 @@ struct Attrib
 	GLint size;
 };
 
-Geometry Geometry::fromFile(std::string _filename)
+Geometry Geometry::fromFile(const std::string& _filename)
 {
 	Geometry g;
 

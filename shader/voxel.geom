@@ -1,6 +1,3 @@
-layout(triangles, invocations = 1) in;
-layout(triangle_strip, max_vertices = 3) out;
-
 #ifdef GL_AMD_shader_trinary_minmax
 #extension GL_AMD_shader_trinary_minmax : require
 #else
@@ -21,6 +18,9 @@ vec2 min3(vec2 a,vec2 b,vec2 c)
 	return min(a, min(b,c));
 }
 #endif
+
+layout(triangles, invocations = 1) in;
+layout(triangle_strip, max_vertices = 3) out;
 
 in VertexData
 {
@@ -77,46 +77,54 @@ void main()
 	vec3 face_normal = normalize(cross(In[1].position - In[0].position, In[2].position - In[0].position));
 	float dominant_axis = max3(face_normal.x, face_normal.y, face_normal.z);
 	mat4 projection;
+    int axis;
 	if(abs(dominant_axis - face_normal.x) < 0.001)
 	{
 		projection = vp_x;
-		Out.axis = 1;
+		axis = 1;
 	}
 	else if(abs(dominant_axis - face_normal.y) < 0.001)
 	{
 		projection = vp_y;
-		Out.axis = 2;
+		axis = 2;
 	}
 	else
 	{
 		projection = vp_z;
-		Out.axis = 3;
+		axis = 3;
 	}
 	vec4 screenpos[3];
 	screenpos[0] = projection * vec4(In[0].position, 1.0);
 	screenpos[1] = projection * vec4(In[1].position, 1.0);
 	screenpos[2] = projection * vec4(In[2].position, 1.0);
 
-	Out.bbox.xy = min3(screenpos[0].xy, screenpos[1].xy, screenpos[2].xy);
-	Out.bbox.zw = max3(screenpos[0].xy, screenpos[1].xy, screenpos[2].xy);
+    vec4 bbox;
+	bbox.xy = min3(screenpos[0].xy, screenpos[1].xy, screenpos[2].xy);
+	bbox.zw = max3(screenpos[0].xy, screenpos[1].xy, screenpos[2].xy);
 	vec2 half_pixel = vec2(1.0/vol_tex_size);
-	Out.bbox.xy -= vec2(half_pixel);
-	Out.bbox.zw += vec2(half_pixel);
+	bbox.xy -= vec2(half_pixel);
+	bbox.zw += vec2(half_pixel);
 
 	expandTriangle(screenpos);
 
+    Out.axis = axis;
+    Out.bbox = bbox;
 	Out.position = In[0].position;
 	Out.normal = In[0].normal;
 	Out.texcoord = In[0].texcoord;
 	gl_Position = screenpos[0];
 	EmitVertex();
 
+    Out.axis = axis;
+    Out.bbox = bbox;
 	Out.position = In[1].position;
 	Out.normal = In[1].normal;
 	Out.texcoord = In[1].texcoord;
 	gl_Position = screenpos[1];
 	EmitVertex();
 
+    Out.axis = axis;
+    Out.bbox = bbox;
 	Out.position = In[2].position;
 	Out.normal = In[2].normal;
 	Out.texcoord = In[2].texcoord;

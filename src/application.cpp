@@ -51,11 +51,6 @@ application::application(GLFWwindow* _win) :
 	glfwGetWindowSize(win, &w_width, &w_height);
 	glfwGetFramebufferSize(win, &f_width, &f_height);
 
-	// render_shader.setStage("shader/render_voxel.vert");
-	// render_shader.setStage("shader/render_voxel.geom");
-	// render_shader.setStage("shader/render_voxel.frag");
-	// render_shader.link();
-
 	voxelize_shader.setStage("shader/voxel.vert");
 	voxelize_shader.setStage("shader/voxel.geom");
 	voxelize_shader.setStage("shader/voxel.frag");
@@ -375,3 +370,4 @@ void application::draw()
 		glDisable(GL_BLEND);
 	}
 }
+
