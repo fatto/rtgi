@@ -67,7 +67,7 @@ public:
 	void addVertexAttrib(GLuint _index, GLint _size, GLuint _stride, const GLvoid* _offset);
 	void addVertexAttribI(GLuint _index, GLint _size, GLuint _stride, const GLvoid* _offset);
 
-	static Geometry fromFile(std::string _filename);
+	static Geometry fromFile(const std::string& _filename);
 };
 
 

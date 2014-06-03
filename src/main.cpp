@@ -200,24 +200,24 @@ int main(int argc, char*argv[])
 	// std::cout << glGetString(GL_RENDERER) << std::endl;
 	// std::cout << glGetString(GL_VERSION) << std::endl;
 	// std::cout << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-	
-	application app(window);
-	auto old_time = timer::now();
-	auto current_time = old_time;
-	float ratio_timer = float(timer::period::num)/float(timer::period::den);
-	while (!glfwWindowShouldClose(window))
 	{
-		current_time = timer::now();
-		float delta = (current_time - old_time).count() * ratio_timer;
-		old_time = current_time;
-//		glfwSetWindowTitle(window, std::to_string(delta).c_str());
+		Application app(window);
+		auto old_time = timer::now();
+		auto current_time = old_time;
+		float ratio_timer = float(timer::period::num)/float(timer::period::den);
+		while (!glfwWindowShouldClose(window))
+		{
+			current_time = timer::now();
+			float delta = (current_time - old_time).count() * ratio_timer;
+			old_time = current_time;
+//			glfwSetWindowTitle(window, std::to_string(delta).c_str());
 
-		app.update(delta);
-		app.draw();
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+			app.update(delta);
+			app.draw();
+			glfwSwapBuffers(window);
+			glfwPollEvents();
+		}
 	}
-	
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	

@@ -34,7 +34,7 @@
 #include <array>
 #include <cassert>
 
-class application
+class Application
 {
 	GLFWwindow* win;
 	int w_width, w_height;
@@ -114,7 +114,7 @@ class application
 	glm::mat4 model, view, projection;
 	float delta = 0.f;
 public:
-	application(GLFWwindow* _win);
+	Application(GLFWwindow* _win);
 	void update(float dt);
 	void draw();
 };

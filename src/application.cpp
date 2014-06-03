@@ -27,7 +27,7 @@
 
 #include <iostream>
 
-application::application(GLFWwindow* _win) :
+Application::Application(GLFWwindow* _win) :
 		win(_win),
 		counter_frag(GL_ATOMIC_COUNTER_BUFFER, GL_STATIC_READ),
 		counter_node(GL_ATOMIC_COUNTER_BUFFER, GL_STATIC_READ),
@@ -164,7 +164,7 @@ application::application(GLFWwindow* _win) :
 	// std::cout <<"texture 3d " << tex3.getUnit() << std::endl;
 }
 
-void application::update(float dt)
+void Application::update(float dt)
 {
 	if(glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(win, GL_TRUE);
@@ -172,7 +172,7 @@ void application::update(float dt)
 	delta = dt;
 }
 
-void application::draw()
+void Application::draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
