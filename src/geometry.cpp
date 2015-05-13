@@ -62,7 +62,7 @@ Geometry& Geometry::operator=(Geometry&& g)
 	return *this;
 }
 
-void Geometry::draw()
+void Geometry::draw(GLsizei _count)
 {
 	if(!vert_init || !ind_init || !vao_init || !size)
 	{
@@ -70,7 +70,7 @@ void Geometry::draw()
 		return;
 	}
 	glBindVertexArray(vao);
-	glDrawElements(GL_TRIANGLES, GLsizei(size), GL_UNSIGNED_INT, 0);
+	glDrawElementsInstanced(GL_TRIANGLES, GLsizei(size), GL_UNSIGNED_INT, 0, _count);
 }
 
 void Geometry::drawArray(GLsizei _count)
@@ -155,21 +155,25 @@ Geometry Geometry::fromFile(const std::string& _filename)
 	assert((version == json11::Json::array{0, 1}));
 
 	auto meshes = json["meshes"].array_items();
-	auto attributes = meshes[0]["attributes"].array_items(); // TODO arbitrary number of meshes
+	//for (size_t n_mesh = 0; n_mesh < meshes.size(); ++n_mesh)
+	//{
+		auto attributes = meshes[0]["attributes"].array_items(); // TODO arbitrary number of meshes
 	std::vector<std::string> attributes_v;
 	std::transform(attributes.begin(), attributes.end(), std::back_inserter(attributes_v), [](const json11::Json& j){return j.string_value(); });
 
 	std::unordered_map<std::string, Attrib, std::function<size_t(std::string)>, std::function<bool(const std::string&, const std::string)>> attributes_hash(
 		3,
 		[](const std::string& s) {
-		std::regex re("([0-9]*)");
+		std::regex re("([0-9]*)$");
 		std::smatch sm;
 		std::regex_search(s, sm, re);
+		//std::cout << s << " " << sm.prefix().str() << " " << sm.suffix().str() << std::endl;
 		return std::hash<std::string>()(sm.prefix().str());
 	},
 		[](const std::string& me, const std::string& s)
 	{
-		return s.find(me) != std::string::npos;
+		//std::cout << "search " << me << " " << s << " " << std::boolalpha << (s.find(me) != std::string::npos || me.find(s) != std::string::npos) << std::endl;
+		return s.find(me) != std::string::npos || me.find(s) != std::string::npos;
 	}
 	);
 	attributes_hash["POSITION"] = { 3, GL_FLOAT, 3 * sizeof(float) };
@@ -202,6 +206,7 @@ Geometry Geometry::fromFile(const std::string& _filename)
 	std::vector<GLuint> indices_v;
 	for (auto& p : parts)
 	{
+		assert(p["type"] == "TRIANGLES");
 		auto i = p["indices"].array_items();
 		std::transform(i.begin(), i.end(), std::back_inserter(indices_v), [](const json11::Json& j){ return j.integer_value(); });
 	}

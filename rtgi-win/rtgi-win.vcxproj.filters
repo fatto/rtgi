@@ -36,6 +36,9 @@
     <ClCompile Include="..\src\framebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\json11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\header\buffer.hpp">
@@ -63,6 +66,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\header\gl_core_4_4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\header\json11.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

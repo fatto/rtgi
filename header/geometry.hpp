@@ -58,7 +58,7 @@ public:
 	Geometry(Geometry&& g);
 	Geometry& operator=(Geometry&& g);
 	
-	void draw();
+	void draw(GLsizei _count = 1);
 	void drawArray(GLsizei _count);
 
 	void vertices(const void* _data, size_t _byte_size);

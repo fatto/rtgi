@@ -24,6 +24,7 @@
 #include <glm/gtc/noise.hpp>
 #include <vector>
 #include <cstdint>
+#include <memory>
 
 #include <iostream>
 
@@ -99,8 +100,9 @@ Application::Application(GLFWwindow* _win) :
 	sphere.addVertexAttrib(1, 3, sizeof(vertex), offsetof_ptr(vertex, norm));*/
 	// sphere.addVertexAttrib(shader.attrib("uv"), 2, sizeof(vertex), offsetof_ptr(vertex, text));
 
-	//sphere = Geometry::fromFile("assets/cornell.g3dj");
-	sphere = Geometry::fromFile("assets/sphere.g3dj");
+	sphere = Geometry::fromFile("assets/cornell.g3dj");
+	cube = Geometry::fromFile("assets/cube.g3dj");
+	//sphere = Geometry::fromFile("assets/sphere.g3dj");
 
 	Plane<1> fullscreen_quad(2.f);
 	quad.vertices(fullscreen_quad.vertices.data(), fullscreen_quad.vertices.size()*sizeof(vertex));
@@ -109,7 +111,7 @@ Application::Application(GLFWwindow* _win) :
 
 	model = glm::mat4(1.f);
 	// model = glm::translate(model, glm::vec3(64.f, 64.f, 64.f));
-	view = glm::lookAt(glm::vec3(1.f, 1.f, -2.5f), glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
+	view = glm::lookAt(glm::vec3(1.f, 0.f, -2.5f), glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
 	projection = glm::perspective(tau/6.f, float(w_width)/float(w_height), .1f, 4500.f);
 
 
@@ -199,7 +201,7 @@ void Application::draw()
 		auto vp_z = ortho * glm::lookAt(glm::vec3(0, 0, (2.f*half_volume_size)), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 		voxelize_shader.bind();
 		voxelize_shader.load("store", GL_FALSE);
-		voxelize_shader.load("pixel_diagonal", float(sqrt(2.f) * 1.f / voxel_dim));
+		//voxelize_shader.load("pixel_diagonal", float(sqrt(2.f) * 1.f / voxel_dim));
 		voxelize_shader.load("voxel_dim", GLuint(voxel_dim));
 		voxelize_shader.load("model", model);
 		voxelize_shader.load("vp_x", vp_x);
@@ -337,14 +339,15 @@ void Application::draw()
 		render_voxel_shader.load("projection", projection);
 		render_voxel_shader.load("voxel_dim", GLuint(voxel_dim));
 		render_voxel_shader.load("level", GLuint(octree_level));
-		render_voxel_shader.load("half_cube", 1.f/float(voxel_dim));
+		//render_voxel_shader.load("half_cube", 1.f/float(voxel_dim));
 		octree_buffer.bindImage(GL_R32UI, GL_READ_ONLY);
 		octree_diffuse_r.bindImage(GL_R32UI, GL_READ_ONLY);
 		octree_diffuse_g.bindImage(GL_R32UI, GL_READ_ONLY);
 		octree_diffuse_b.bindImage(GL_R32UI, GL_READ_ONLY);
 		octree_diffuse_a.bindImage(GL_R32UI, GL_READ_ONLY);
 
-		dummy.drawArray(voxel_dim * voxel_dim * voxel_dim);
+		//dummy.drawArray(voxel_dim * voxel_dim * voxel_dim);
+		cube.draw(voxel_dim * voxel_dim * voxel_dim);
 	}
 	// glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	// {
@@ -358,7 +361,7 @@ void Application::draw()
 	// 	tex3.bindImage(GL_R32UI, GL_READ_ONLY);
 	// 	quad.draw();
 	// }
-	{
+	/*{
 		glEnable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
 		fontmap.bind();
@@ -368,6 +371,6 @@ void Application::draw()
 		text.vertices(test.data(), test.size());
 		text.drawArray(test.size());
 		glDisable(GL_BLEND);
-	}
+	}*/
 }
 

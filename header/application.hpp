@@ -43,6 +43,7 @@ class Application
 	Geometry quad;
 	Geometry text;
 	Geometry dummy;
+	Geometry cube;
 
 	Buffer counter_frag;
 	Buffer counter_node;

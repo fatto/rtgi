@@ -78,12 +78,12 @@ void main()
 	float dominant_axis = max3(face_normal.x, face_normal.y, face_normal.z);
 	mat4 projection;
     int axis;
-	if(abs(dominant_axis - face_normal.x) < 0.001)
+	if(abs(dominant_axis - face_normal.x) < 0.00001)
 	{
 		projection = vp_x;
 		axis = 1;
 	}
-	else if(abs(dominant_axis - face_normal.y) < 0.001)
+	else if(abs(dominant_axis - face_normal.y) < 0.00001)
 	{
 		projection = vp_y;
 		axis = 2;
@@ -105,7 +105,7 @@ void main()
 	bbox.xy -= vec2(half_pixel);
 	bbox.zw += vec2(half_pixel);
 
-	expandTriangle(screenpos);
+	// expandTriangle(screenpos);
 
     Out.axis = axis;
     Out.bbox = bbox;

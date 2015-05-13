@@ -1,13 +1,8 @@
 layout(local_size_x = 8, local_size_y = 8) in;
 
-uniform uint voxel_frag_count;
 uniform uint level;
-uniform uint voxel_dim;
 
-layout(binding = 0, rgb10_a2ui) uniform uimageBuffer voxel_position;
-layout(binding = 1, rgba8ui) uniform uimageBuffer voxel_diffuse;
-// layout(binding = 2, rgba32f) uniform imageBuffer voxel_normal;
-
+//layout(binding = 0, rgb10_a2ui) uniform uimageBuffer voxel_position;
 layout(binding = 3, r32ui) uniform uimageBuffer octree_buffer;
 
 layout(binding = 4, r32ui) uniform uimageBuffer octree_diffuse_r;
@@ -15,14 +10,10 @@ layout(binding = 5, r32ui) uniform uimageBuffer octree_diffuse_g;
 layout(binding = 6, r32ui) uniform uimageBuffer octree_diffuse_b;
 layout(binding = 7, r32ui) uniform uimageBuffer octree_diffuse_a;
 
-// layout(binding = 8, r32f) uniform uimageBuffer octree_normal;
-// layout(binding = 9, r32f) uniform uimageBuffer octree_normal;
-// layout(binding = 10, r32f) uniform uimageBuffer octree_normal;
-
 void main()
 {
 	uint th_id = gl_GlobalInvocationID.y * 1024 + gl_GlobalInvocationID.x;
-	if(th_id >= voxel_frag_count)
+	if(th_id >= 8*level)
 		return;
 
 	uvec3 umin = uvec3(0, 0, 0);
@@ -31,12 +22,14 @@ void main()
 	uint node = imageLoad(octree_buffer, int(child_id)).r;
 	uvec3 offset;
 	uint voxel_dimension = voxel_dim;
+	bool flag = true;
 
 	for(uint i = 0; i < level; ++i)
 	{
 		voxel_dimension /= 2;
 		if((node & 0x80000000) == 0)
 		{
+			flag = false;
 			break;
 		}
 
@@ -45,8 +38,6 @@ void main()
 		// offset =      clamp(int(1+location.x-umin.x-voxel_dimension), 0, 1);
 		// offset += 4 * clamp(int(1+location.y-umin.y-voxel_dimension), 0, 1);
 		// offset += 2 * clamp(int(1+location.z-umin.z-voxel_dimension), 0, 1);
-		// child_id += offset;
-
 		offset = clamp(ivec3(1 + location.xyz - umin - voxel_dimension), 0, 1);
 		child_id += offset.x + 4 * offset.y + 2 * offset.z;
 
@@ -58,10 +49,9 @@ void main()
 
 		node = imageLoad(octree_buffer, int(child_id)).r;
 	}
-	uvec4 colour = uvec4(imageLoad(voxel_diffuse, int(th_id)));
-	imageAtomicAdd(octree_diffuse_r, int(child_id), colour.r);
-	imageAtomicAdd(octree_diffuse_g, int(child_id), colour.g);
-	imageAtomicAdd(octree_diffuse_b, int(child_id), colour.b);
-	imageAtomicAdd(octree_diffuse_a, int(child_id), uint(1));
-	// vec4 normal = imageLoad(voxel_normal, int(th_id));
+	if(flag)
+	{
+		node |= 0x80000000; // set most significant bit
+		imageStore(octree_buffer, int(child_id), uvec4(node, 0, 0, 0));
+	}
 }
