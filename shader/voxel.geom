@@ -105,7 +105,7 @@ void main()
 	bbox.xy -= vec2(half_pixel);
 	bbox.zw += vec2(half_pixel);
 
-	// expandTriangle(screenpos);
+	expandTriangle(screenpos);
 
     Out.axis = axis;
     Out.bbox = bbox;

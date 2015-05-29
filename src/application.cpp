@@ -170,7 +170,7 @@ void Application::update(float dt)
 {
 	if(glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(win, GL_TRUE);
-	model = glm::rotate(model, dt, glm::vec3(0.f, 1.f, 0.f));
+	//model = glm::rotate(model, dt, glm::vec3(0.f, 1.f, 0.f));
 	delta = dt;
 }
 

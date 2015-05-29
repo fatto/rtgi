@@ -5,7 +5,7 @@ in VertexData
 {
 	vec4 position;
 	uvec3 texcoord;
-} In[1];
+} In[3];
 
 out FragmentData
 {

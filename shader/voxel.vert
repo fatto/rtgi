@@ -9,13 +9,16 @@ out VertexData
 	vec2 texcoord;
 } Out;
 
-uniform mat4 model;
+// uniform mat4 model;
 // uniform mat4 view;
 
 void main(void)
 {
-	Out.position = (model * vec4(position, 1.0)).xyz;
-	Out.normal = mat3(model) * normal;
+	// Out.position = (model * vec4(position, 1.0)).xyz;
+
+	// Out.normal = mat3(model) * normal;
+	Out.position = position;
+	Out.normal = normal;
 	Out.texcoord = texcoord;
-	// gl_Position = view * model * vec4(position, 1.0);
+	gl_Position = vec4(position, 1.0);
 }
