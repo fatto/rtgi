@@ -21,10 +21,26 @@ uniform float half_cube;
 
 layout(binding = 3, r32ui) uniform uimageBuffer octree_buffer;
 
-layout(binding = 4, r32ui) uniform uimageBuffer octree_diffuse_r;
-layout(binding = 5, r32ui) uniform uimageBuffer octree_diffuse_g;
-layout(binding = 6, r32ui) uniform uimageBuffer octree_diffuse_b;
-layout(binding = 7, r32ui) uniform uimageBuffer octree_diffuse_a;
+layout(binding = 4, r32ui) uniform uimageBuffer octree_diffuse;
+
+layout(binding = 5, r32f) uniform imageBuffer octree_normal;
+
+// layout(binding = 3, r32ui) uniform uimageBuffer octree_buffer;
+
+// layout(binding = 4, r32ui) uniform uimageBuffer octree_diffuse_r;
+// layout(binding = 5, r32ui) uniform uimageBuffer octree_diffuse_g;
+// layout(binding = 6, r32ui) uniform uimageBuffer octree_diffuse_b;
+// layout(binding = 7, r32ui) uniform uimageBuffer octree_diffuse_a;
+// layout(binding = 0, r32ui) uniform uimageBuffer octree_buffer;
+
+// layout(binding = 1, r32ui) uniform uimageBuffer octree_diffuse_r;
+// layout(binding = 2, r32ui) uniform uimageBuffer octree_diffuse_g;
+// layout(binding = 3, r32ui) uniform uimageBuffer octree_diffuse_b;
+// layout(binding = 4, r32ui) uniform uimageBuffer octree_diffuse_a;
+
+// layout(binding = 5, r32f) uniform imageBuffer octree_normal_x;
+// layout(binding = 6, r32f) uniform imageBuffer octree_normal_y;
+// layout(binding = 7, r32f) uniform imageBuffer octree_normal_z;
 
 bool emptyNode(in uvec3 location, out uint leaf)
 {
@@ -70,11 +86,12 @@ void main()
 	vec4 colour;
 	if(!emptyNode(In[0].texcoord, leaf))
 	{
+		int rgba_index = int(leaf) * 4;
 		colour = vec4(
-			imageLoad(octree_diffuse_r, int(leaf)).r,
-			imageLoad(octree_diffuse_g, int(leaf)).r,
-			imageLoad(octree_diffuse_b, int(leaf)).r,
-			imageLoad(octree_diffuse_a, int(leaf)).r);
+			imageLoad(octree_diffuse, rgba_index+0).r,
+			imageLoad(octree_diffuse, rgba_index+1).r,
+			imageLoad(octree_diffuse, rgba_index+2).r,
+			imageLoad(octree_diffuse, rgba_index+3).r);
 	}
 	else
 	{

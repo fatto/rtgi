@@ -1,0 +1,30 @@
+﻿Compilazione avviata 14/07/2015 15:37:06.
+     1>Progetto "C:\Users\Utente\Documents\GitHub\rtgi\rtgi-win\rtgi-win.vcxproj" sul nodo 2 (destinazioni: Build).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _CRT_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_DEPRECATE /D GLM_FORCE_RADIANS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /openmp /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ..\src\application.cpp ..\src\buffer.cpp ..\src\framebuffer.cpp ..\src\gl_core_4_4.cpp ..\src\json11.cpp ..\src\lodepng.cpp ..\src\shader.cpp
+         application.cpp
+         Generating Code...
+         Skipping... (no relevant changes detected)
+         shader.cpp
+         lodepng.cpp
+         json11.cpp
+         gl_core_4_4.cpp
+         framebuffer.cpp
+         buffer.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Utente\Documents\GitHub\rtgi\rtgi-win\Debug\rtgi-win.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Utente\Documents\GitHub\rtgi\rtgi-win\Debug\rtgi-win.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Utente\Documents\GitHub\rtgi\rtgi-win\Debug\rtgi-win.lib" /MACHINE:X86 Debug\framebuffer.obj
+         Debug\json11.obj
+         Debug\lodepng.obj
+         Debug\main.obj
+         Debug\shader.obj
+         Debug\texture.obj
+         Debug\application.obj
+         Debug\buffer.obj
+         Debug\geometry.obj
+         Debug\gl_core_4_4.obj
+         rtgi-win.vcxproj -> C:\Users\Utente\Documents\GitHub\rtgi\rtgi-win\Debug\rtgi-win.exe
+     1>Compilazione progetto "C:\Users\Utente\Documents\GitHub\rtgi\rtgi-win\rtgi-win.vcxproj" (destinazioni: Build) completata.
+
+Compilazione completata.
+
+Tempo trascorso 00:00:00.89

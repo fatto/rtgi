@@ -37,17 +37,27 @@ Application::Application(GLFWwindow* _win) :
 		buffer_voxel_diffuse(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
 		voxel_diffuse(1),
 		buffer_voxel_normal(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
-		voxel_normal(2),		
+		voxel_normal(2),
 		buffer_octree_buffer(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
 		octree_buffer(3),
-		buffer_octree_diffuse_r(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
-		octree_diffuse_r(4),
+		buffer_octree_diffuse(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
+		octree_diffuse(4),
+		buffer_octree_normal(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
+		octree_normal(5)
+		/*buffer_octree_diffuse_r(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
+		octree_diffuse_r(1),
 		buffer_octree_diffuse_g(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
-		octree_diffuse_g(5),
+		octree_diffuse_g(2),
 		buffer_octree_diffuse_b(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
-		octree_diffuse_b(6),
+		octree_diffuse_b(3),
 		buffer_octree_diffuse_a(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
-		octree_diffuse_a(7)
+		octree_diffuse_a(4),
+		buffer_octree_normal_x(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
+		octree_normal_x(5),
+		buffer_octree_normal_y(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
+		octree_normal_y(6),
+		buffer_octree_normal_z(GL_TEXTURE_BUFFER, GL_STATIC_COPY),
+		octree_normal_z(7)*/
 {
 	glfwGetWindowSize(win, &w_width, &w_height);
 	glfwGetFramebufferSize(win, &f_width, &f_height);
@@ -63,6 +73,8 @@ Application::Application(GLFWwindow* _win) :
 	alloc_shader.link();
 	store_shader.setStage("shader/store.comp");
 	store_shader.link();
+	mipmap_shader.setStage("shader/mipmap.comp");
+	mipmap_shader.link();
 
 	render_voxel_shader.setStage("shader/render_voxel.vert");
 	render_voxel_shader.setStage("shader/render_voxel.geom");
@@ -139,7 +151,11 @@ Application::Application(GLFWwindow* _win) :
 
 	buffer_octree_buffer.bind();
 	octree_buffer.buffer(buffer_octree_buffer.getName(), GL_R32UI);
-	buffer_octree_diffuse_r.bind();
+	buffer_octree_diffuse.bind();
+	octree_diffuse.buffer(buffer_octree_diffuse.getName(), GL_R32UI);
+	buffer_octree_normal.bind();
+	octree_normal.buffer(buffer_octree_normal.getName(), GL_R32F);
+	/*buffer_octree_diffuse_r.bind();
 	octree_diffuse_r.buffer(buffer_octree_diffuse_r.getName(), GL_R32UI);
 	buffer_octree_diffuse_g.bind();
 	octree_diffuse_g.buffer(buffer_octree_diffuse_g.getName(), GL_R32UI);
@@ -147,6 +163,12 @@ Application::Application(GLFWwindow* _win) :
 	octree_diffuse_b.buffer(buffer_octree_diffuse_b.getName(), GL_R32UI);
 	buffer_octree_diffuse_a.bind();
 	octree_diffuse_a.buffer(buffer_octree_diffuse_a.getName(), GL_R32UI);
+	buffer_octree_normal_x.bind();
+	octree_normal_x.buffer(buffer_octree_normal_x.getName(), GL_R32F);
+	buffer_octree_normal_y.bind();
+	octree_normal_y.buffer(buffer_octree_normal_y.getName(), GL_R32F);
+	buffer_octree_normal_z.bind();
+	octree_normal_z.buffer(buffer_octree_normal_z.getName(), GL_R32F);*/
 
 	size_t total_node = 1;
 	size_t n_part = 1;
@@ -156,10 +178,15 @@ Application::Application(GLFWwindow* _win) :
 		total_node += n_part;
 	}
 	buffer_octree_buffer.data(NULL, total_node*sizeof(uint32_t));
-	buffer_octree_diffuse_r.data(NULL, total_node*sizeof(uint32_t));
+	buffer_octree_diffuse.data(NULL, total_node*sizeof(uint32_t)*4);
+	buffer_octree_normal.data(NULL, total_node*sizeof(float_t)*3);
+	/*buffer_octree_diffuse_r.data(NULL, total_node*sizeof(uint32_t));
 	buffer_octree_diffuse_g.data(NULL, total_node*sizeof(uint32_t));
 	buffer_octree_diffuse_b.data(NULL, total_node*sizeof(uint32_t));
 	buffer_octree_diffuse_a.data(NULL, total_node*sizeof(uint32_t));
+	buffer_octree_normal_x.data(NULL, total_node*sizeof(float_t));
+	buffer_octree_normal_y.data(NULL, total_node*sizeof(float_t));
+	buffer_octree_normal_z.data(NULL, total_node*sizeof(float_t));*/
 	
 	// voxelize_shader.bind();
 	// voxelize_shader.load("pixel_diagonal", float(sqrt(2.f) * 1.f / 512));
@@ -203,7 +230,7 @@ void Application::draw()
 		voxelize_shader.load("store", GL_FALSE);
 		//voxelize_shader.load("pixel_diagonal", float(sqrt(2.f) * 1.f / voxel_dim));
 		voxelize_shader.load("voxel_dim", GLuint(voxel_dim));
-		voxelize_shader.load("model", model);
+		//voxelize_shader.load("model", model);
 		voxelize_shader.load("vp_x", vp_x);
 		voxelize_shader.load("vp_y", vp_y);
 		voxelize_shader.load("vp_z", vp_z);
@@ -256,10 +283,15 @@ void Application::draw()
 
 		// clear every octree-buffer
 		buffer_octree_buffer.clear(GL_R32UI, GL_RED, GL_UNSIGNED_INT);
-		buffer_octree_diffuse_r.clear(GL_R32UI, GL_RED, GL_UNSIGNED_INT);
+		buffer_octree_diffuse.clear(GL_R32UI, GL_RED, GL_UNSIGNED_INT);
+		buffer_octree_normal.clear(GL_R32F, GL_RED, GL_FLOAT);
+		/*buffer_octree_diffuse_r.clear(GL_R32UI, GL_RED, GL_UNSIGNED_INT);
 		buffer_octree_diffuse_g.clear(GL_R32UI, GL_RED, GL_UNSIGNED_INT);
 		buffer_octree_diffuse_b.clear(GL_R32UI, GL_RED, GL_UNSIGNED_INT);
 		buffer_octree_diffuse_a.clear(GL_R32UI, GL_RED, GL_UNSIGNED_INT);
+		buffer_octree_normal_x.clear(GL_R32F, GL_RED, GL_FLOAT);
+		buffer_octree_normal_y.clear(GL_R32F, GL_RED, GL_FLOAT);
+		buffer_octree_normal_z.clear(GL_R32F, GL_RED, GL_FLOAT);*/
 
 		for(size_t i = 0; i < octree_level; ++i)
 		{
@@ -315,15 +347,34 @@ void Application::draw()
 		store_shader.load("voxel_dim", GLuint(voxel_dim));
 		voxel_position.bindImage(GL_RGB10_A2UI, GL_READ_ONLY);
 		voxel_diffuse.bindImage(GL_RGBA8UI, GL_READ_ONLY);
+		//voxel_position.bind();
+		//voxel_diffuse.bind();
+		//voxel_normal.bind();
+
 		octree_buffer.bindImage(GL_R32UI, GL_READ_ONLY);
-		octree_diffuse_r.bindImage(GL_R32UI);
+		octree_diffuse.bindImage(GL_R32UI);
+		octree_normal.bindImage(GL_R32F);
+		/*octree_diffuse_r.bindImage(GL_R32UI);
 		octree_diffuse_g.bindImage(GL_R32UI);
 		octree_diffuse_b.bindImage(GL_R32UI);
 		octree_diffuse_a.bindImage(GL_R32UI);
+		octree_normal_x.bindImage(GL_R32F);
+		octree_normal_y.bindImage(GL_R32F);
+		octree_normal_z.bindImage(GL_R32F);*/
 		glDispatchCompute(group_dim_x, group_dim_y, 1);
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 		// TODO mip-mapping
+		mipmap_shader.bind();
+		octree_buffer.bindImage(GL_R32UI, GL_READ_ONLY);
+		octree_diffuse.bindImage(GL_R32UI);
+		octree_normal.bindImage(GL_R32F);
+		for (int i = octree_level - 1; i >= 0; --i)
+		{
+			store_shader.load("level", GLuint(i));
+			glDispatchCompute(group_dim_x, group_dim_y, 1);
+			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		}
 	}
 	{
 		glEnable(GL_CULL_FACE);
@@ -341,10 +392,15 @@ void Application::draw()
 		render_voxel_shader.load("level", GLuint(octree_level));
 		//render_voxel_shader.load("half_cube", 1.f/float(voxel_dim));
 		octree_buffer.bindImage(GL_R32UI, GL_READ_ONLY);
-		octree_diffuse_r.bindImage(GL_R32UI, GL_READ_ONLY);
+		octree_diffuse.bindImage(GL_R32UI, GL_READ_ONLY);
+		octree_normal.bindImage(GL_R32F, GL_READ_ONLY);
+		/*octree_diffuse_r.bindImage(GL_R32UI, GL_READ_ONLY);
 		octree_diffuse_g.bindImage(GL_R32UI, GL_READ_ONLY);
 		octree_diffuse_b.bindImage(GL_R32UI, GL_READ_ONLY);
 		octree_diffuse_a.bindImage(GL_R32UI, GL_READ_ONLY);
+		octree_normal_x.bindImage(GL_R32F, GL_READ_ONLY);
+		octree_normal_y.bindImage(GL_R32F, GL_READ_ONLY);
+		octree_normal_z.bindImage(GL_R32F, GL_READ_ONLY);*/
 
 		//dummy.drawArray(voxel_dim * voxel_dim * voxel_dim);
 		cube.draw(voxel_dim * voxel_dim * voxel_dim);
