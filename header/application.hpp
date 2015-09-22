@@ -97,13 +97,7 @@ class Application
 	Buffer buffer_octree_buffer;
 	TextureBuffer octree_buffer;
 
-	Buffer buffer_octree_diffuse;
-	TextureBuffer octree_diffuse;
-
-	Buffer buffer_octree_normal;
-	TextureBuffer octree_normal;
-
-	/*Buffer buffer_octree_diffuse_r;
+	Buffer buffer_octree_diffuse_r;
 	TextureBuffer octree_diffuse_r;
 
 	Buffer buffer_octree_diffuse_g;
@@ -114,15 +108,6 @@ class Application
 
 	Buffer buffer_octree_diffuse_a;
 	TextureBuffer octree_diffuse_a;
-
-	Buffer buffer_octree_normal_x;
-	TextureBuffer octree_normal_x;
-
-	Buffer buffer_octree_normal_y;
-	TextureBuffer octree_normal_y;
-
-	Buffer buffer_octree_normal_z;
-	TextureBuffer octree_normal_z;*/
 
 	GLuint max_frag = 0;
 

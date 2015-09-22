@@ -1,53 +1,43 @@
-#extension GL_NV_shader_atomic_float : require
-
 layout(local_size_x = 8, local_size_y = 8) in;
 
 uniform uint level;
 
+//layout(binding = 0, rgb10_a2ui) uniform uimageBuffer voxel_position;
 layout(binding = 3, r32ui) uniform uimageBuffer octree_buffer;
 
-layout(binding = 4, r32ui) uniform uimageBuffer octree_diffuse;
-
-layout(binding = 5, r32f) uniform imageBuffer octree_normal;
-
+layout(binding = 4, r32ui) uniform uimageBuffer octree_diffuse_r;
+layout(binding = 5, r32ui) uniform uimageBuffer octree_diffuse_g;
+layout(binding = 6, r32ui) uniform uimageBuffer octree_diffuse_b;
+layout(binding = 7, r32ui) uniform uimageBuffer octree_diffuse_a;
 
 void main()
 {
 	uint th_id = gl_GlobalInvocationID.y * 1024 + gl_GlobalInvocationID.x;
-	int nodes = int(exp2(3*level));
-	int subdivisions = int(exp2(level));
-	if(th_id >= nodes)
+	if(th_id >= 8*level)
 		return;
 
 	uvec3 umin = uvec3(0, 0, 0);
-	// uvec4 location = texelFetch(voxel_position, int(th_id)); // voxel coordinates of voxel loaded by this thread
-	// uvec4 location = imageLoad(voxel_position, int(th_id)); // voxel coordinates of voxel loaded by this thread
-	// Out.texcoord.x = gl_InstanceID % voxel_dim;
-	// Out.texcoord.y = (gl_InstanceID / voxel_dim) % voxel_dim;
-	// Out.texcoord.z = gl_InstanceID / (voxel_dim * voxel_dim);
-	ivec3 location = ivec3(th_id%subdivisions, (th_id/subdivisions)%subdivisions, th_id/(subdivisions*subdivisions));
+	uvec4 location = imageLoad(voxel_position, int(th_id)); // voxel coordinates of voxel loaded by this thread
 	uint child_id = 0;
-	uint prev_child = 0;
 	uint node = imageLoad(octree_buffer, int(child_id)).r;
 	uvec3 offset;
-	uint voxel_dimension = subdivisions;
+	uint voxel_dimension = voxel_dim;
+	bool flag = true;
 
 	for(uint i = 0; i < level; ++i)
 	{
 		voxel_dimension /= 2;
 		if((node & 0x80000000) == 0)
 		{
-			return;
+			flag = false;
+			break;
 		}
 
-		prev_child = child_id;
 		child_id = (node & 0x7fffffff); // get child id masking out flag bit
 
 		// offset =      clamp(int(1+location.x-umin.x-voxel_dimension), 0, 1);
 		// offset += 4 * clamp(int(1+location.y-umin.y-voxel_dimension), 0, 1);
 		// offset += 2 * clamp(int(1+location.z-umin.z-voxel_dimension), 0, 1);
-		// child_id += offset;
-
 		offset = clamp(ivec3(1 + location.xyz - umin - voxel_dimension), 0, 1);
 		child_id += offset.x + 4 * offset.y + 2 * offset.z;
 
@@ -59,34 +49,9 @@ void main()
 
 		node = imageLoad(octree_buffer, int(child_id)).r;
 	}
-
-	uvec4 colour = uvec4(0);
-	vec4 normal = vec4(0.0);
-	for(uint i = 0; i < 7; ++i)
+	if(flag)
 	{
-		int image_index = int(child_id+i);
-		int rgba_index = image_index*4;
-		int nxnynz_index = image_index*3;
-		colour += uvec4(imageLoad(octree_diffuse, rgba_index+0).r, imageLoad(octree_diffuse, rgba_index+1).r,imageLoad(octree_diffuse, rgba_index+2).r,imageLoad(octree_diffuse, rgba_index+3).r);
-		normal += vec4(imageLoad(octree_normal, nxnynz_index+0).r, imageLoad(octree_normal, nxnynz_index+1).r, imageLoad(octree_normal, nxnynz_index+2).r, 1.0);
+		node |= 0x80000000; // set most significant bit
+		imageStore(octree_buffer, int(child_id), uvec4(node, 0, 0, 0));
 	}
-
-	colour /= colour.a;
-	normal /= normal.w;
-
-	int rgba_prev_index = int(prev_child)*4;
-	int nxnynz_prev_index = int(prev_child)*3;
-	imageStore(octree_diffuse, rgba_prev_index+0, uvec4(colour.r, 0, 0, 0));
-	imageStore(octree_diffuse, rgba_prev_index+1, uvec4(colour.g, 0, 0, 0));
-	imageStore(octree_diffuse, rgba_prev_index+2, uvec4(colour.b, 0, 0, 0));
-	imageStore(octree_diffuse, rgba_prev_index+3, uvec4(colour.a, 0, 0, 0));
-
-	imageStore(octree_normal, nxnynz_prev_index+0, vec4(normal.x, 0.0, 0.0, 0.0));
-	imageStore(octree_normal, nxnynz_prev_index+1, vec4(normal.y, 0.0, 0.0, 0.0));
-	imageStore(octree_normal, nxnynz_prev_index+2, vec4(normal.z, 0.0, 0.0, 0.0));
-
-	// vec4 normal = texelFetch(voxel_normal, int(th_id));
-	// imageAtomicAdd(octree_normal_x, int(child_id), normal.x);
-	// imageAtomicAdd(octree_normal_y, int(child_id), normal.y);
-	// imageAtomicAdd(octree_normal_z, int(child_id), normal.z);
 }
